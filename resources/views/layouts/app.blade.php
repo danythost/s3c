@@ -48,23 +48,67 @@
                                 <li>
                                     <ul role="list" class="-mx-2 space-y-1">
                                         @php
-                                            $links = [
+                                            $isMarketing = request()->routeIs('home') || request()->is('/');
+                                            
+                                            $appLinks = [
                                                 ['name' => 'Dashboard', 'route' => 'dashboard', 'icon' => '🏠'],
                                                 ['name' => 'Data Bundle', 'route' => 'vtu.data.index', 'icon' => '📶'],
                                                 ['name' => 'Airtime', 'route' => 'vtu.data.index', 'icon' => '📞'],
                                                 ['name' => 'My Wallet', 'route' => 'wallet.index', 'icon' => '💳'],
                                             ];
+
+                                            $marketingLinks = [
+                                                ['name' => 'Shop', 'url' => '#shop', 'icon' => '🛍️'],
+                                                ['name' => 'About Us', 'url' => '#about', 'icon' => '📖'],
+                                                ['name' => 'Developers', 'url' => '#', 'icon' => '👨‍💻'],
+                                                ['name' => 'Contact', 'url' => '#contact', 'icon' => '✉️'],
+                                            ];
+
+                                            $activeLinks = $isMarketing ? $marketingLinks : $appLinks;
                                         @endphp
-                                        @foreach($links as $link)
+                                        
+                                        @foreach($activeLinks as $link)
                                             <li>
-                                                <a href="{{ route($link['route']) }}" class="{{ request()->routeIs($link['route']) ? 'bg-white/5 text-blue-400 border-l-2 border-blue-400' : 'text-gray-400 hover:text-white hover:bg-white/5' }} flex gap-x-3 rounded-md p-3 text-sm leading-6 font-semibold transition-all">
+                                                <a href="{{ isset($link['route']) ? route($link['route']) : $link['url'] }}" 
+                                                   class="{{ (isset($link['route']) && request()->routeIs($link['route'])) ? 'bg-white/5 text-blue-400 border-l-2 border-blue-400' : 'text-gray-400 hover:text-white hover:bg-white/5' }} flex gap-x-3 rounded-md p-3 text-sm leading-6 font-semibold transition-all">
                                                     <span>{{ $link['icon'] }}</span>
                                                     {{ $link['name'] }}
                                                 </a>
                                             </li>
                                         @endforeach
+
+                                        @if($isMarketing)
+                                            @guest
+                                                <li class="mt-4 pt-4 border-t border-white/5">
+                                                    <a href="{{ route('login') }}" class="flex gap-x-3 rounded-md p-3 text-sm leading-6 font-semibold text-blue-400 hover:bg-blue-500/10 transition-all">
+                                                        <span>👤</span>
+                                                        Sign In
+                                                    </a>
+                                                </li>
+                                            @endguest
+                                            @auth
+                                                <li class="mt-4 pt-4 border-t border-white/5">
+                                                    <a href="{{ route('dashboard') }}" class="flex gap-x-3 rounded-md p-3 text-sm leading-6 font-semibold text-emerald-400 hover:bg-emerald-500/10 transition-all">
+                                                        <span>🚀</span>
+                                                        Go to Dashboard
+                                                    </a>
+                                                </li>
+                                            @endauth
+                                        @endif
                                     </ul>
                                 </li>
+
+                                @if(!$isMarketing)
+                                    <li class="mt-auto">
+                                        <form method="POST" action="{{ route('logout') }}">
+                                            @csrf
+                                            <button type="submit" class="-mx-2 flex gap-x-3 rounded-md p-2 text-sm font-semibold leading-6 text-gray-400 hover:bg-red-500/10 hover:text-red-400 w-full text-left transition-all">
+                                                <span>🚪</span>
+                                                Logout
+                                            </button>
+                                        </form>
+                                    </li>
+                                @endif
                             </ul>
                         </nav>
                     </div>
@@ -82,26 +126,48 @@
                     <ul role="list" class="flex flex-1 flex-col gap-y-7">
                         <li>
                             <ul role="list" class="-mx-2 space-y-2 mt-4">
-                                @foreach($links as $link)
+                                @foreach($activeLinks as $link)
                                     <li>
-                                        <a href="{{ route($link['route']) }}" class="{{ request()->routeIs($link['route']) ? 'bg-blue-500/10 text-blue-400 border-l-4 border-blue-500' : 'text-gray-400 hover:text-white hover:bg-white/5' }} group flex gap-x-3 rounded-r-xl p-3 text-sm leading-6 font-bold transition-all">
+                                        <a href="{{ isset($link['route']) ? route($link['route']) : $link['url'] }}" 
+                                           class="{{ (isset($link['route']) && request()->routeIs($link['route'])) ? 'bg-blue-500/10 text-blue-400 border-l-4 border-blue-500' : 'text-gray-400 hover:text-white hover:bg-white/5' }} group flex gap-x-3 rounded-r-xl p-3 text-sm leading-6 font-bold transition-all">
                                             <span class="text-xl opacity-70 group-hover:scale-110 transition-transform">{{ $link['icon'] }}</span>
                                             {{ $link['name'] }}
                                         </a>
                                     </li>
                                 @endforeach
+
+                                @if($isMarketing)
+                                    @guest
+                                        <li class="mt-4 pt-4 border-t border-white/5">
+                                            <a href="{{ route('login') }}" class="flex gap-x-3 rounded-md p-3 text-sm leading-6 font-bold text-blue-400 hover:bg-blue-500/10 transition-all">
+                                                <span>👤</span>
+                                                Sign In
+                                            </a>
+                                        </li>
+                                    @endguest
+                                    @auth
+                                        <li class="mt-4 pt-4 border-t border-white/5">
+                                            <a href="{{ route('dashboard') }}" class="flex gap-x-3 rounded-md p-3 text-sm leading-6 font-bold text-emerald-400 hover:bg-emerald-500/10 transition-all">
+                                                <span>🚀</span>
+                                                Go to Dashboard
+                                            </a>
+                                        </li>
+                                    @endauth
+                                @endif
                             </ul>
                         </li>
                         
-                        <li class="mt-auto">
-                            <form method="POST" action="{{ route('logout') }}">
-                                @csrf
-                                <button type="submit" class="-mx-2 flex gap-x-3 rounded-md p-2 text-sm font-semibold leading-6 text-gray-400 hover:bg-red-500/10 hover:text-red-400 w-full text-left transition-all">
-                                    <span>🚪</span>
-                                    Logout
-                                </button>
-                            </form>
-                        </li>
+                        @if(!$isMarketing)
+                            <li class="mt-auto">
+                                <form method="POST" action="{{ route('logout') }}">
+                                    @csrf
+                                    <button type="submit" class="-mx-2 flex gap-x-3 rounded-md p-2 text-sm font-semibold leading-6 text-gray-400 hover:bg-red-500/10 hover:text-red-400 w-full text-left transition-all">
+                                        <span>🚪</span>
+                                        Logout
+                                    </button>
+                                </form>
+                            </li>
+                        @endif
                     </ul>
                 </nav>
             </div>
