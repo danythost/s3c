@@ -5,9 +5,11 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class Transaction extends Model
+class WalletTransaction extends Model
 {
     use HasFactory;
+
+    protected $table = 'wallet_transactions';
 
     protected $fillable = [
         'user_id',
@@ -16,6 +18,7 @@ class Transaction extends Model
         'type',
         'amount',
         'status',
+        'source',
         'meta',
     ];
 

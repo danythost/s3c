@@ -29,103 +29,147 @@
         }
     </style>
 </head>
-<body class="h-full">
-    <div class="min-h-full">
-        <nav x-data="{ open: false }" class="glass sticky top-0 z-50 border-b border-white/10">
-            <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-                <div class="flex h-16 items-center justify-between">
-                    <div class="flex items-center">
-                        <a href="/" class="text-2xl font-bold bg-gradient-to-r from-blue-400 to-emerald-400 bg-clip-text text-transparent">
-                            S3C
-                        </a>
-                        <div class="hidden md:block ml-10">
-                            <div class="flex items-baseline space-x-4">
-                                <a href="{{ route('home') }}" class="text-gray-300 hover:bg-white/10 px-3 py-2 rounded-md text-sm font-medium">Home</a>
-                                <a href="{{ route('vtu.data.index') }}" class="text-gray-300 hover:bg-white/10 px-3 py-2 rounded-md text-sm font-medium">Data Bundle</a>
-                                <a href="/#about" class="text-gray-300 hover:bg-white/10 px-3 py-2 rounded-md text-sm font-medium">About Us</a>
-                                <a href="/#contact" class="text-gray-300 hover:bg-white/10 px-3 py-2 rounded-md text-sm font-medium">Contact</a>
-                                @guest
-                                    <a href="{{ route('login') }}" class="text-gray-300 hover:bg-white/10 px-3 py-2 rounded-md text-sm font-medium transition-all">Login</a>
-                                @endguest
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <!-- Mobile menu button and Desktop Logout -->
-                    <div class="flex items-center gap-4">
-                        @auth
-                            <form method="POST" action="{{ route('logout') }}" class="hidden md:block">
-                                @csrf
-                                <button type="submit" class="flex items-center gap-2 text-gray-400 hover:text-white transition-colors group">
-                                    <span class="text-sm font-medium">Logout</span>
-                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5 group-hover:translate-x-1 transition-transform">
-                                        <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 9V5.25A2.25 2.25 0 0013.5 3h-6a2.25 2.25 0 00-2.25 2.25v13.5A2.25 2.25 0 007.5 21h6a2.25 2.25 0 002.25-2.25V15M12 9l-3 3m0 0l3 3m-3-3h12.75" />
-                                    </svg>
-                                </button>
-                            </form>
-                        @endauth
-
-                        <div class="md:hidden">
-                            <button @click="open = !open" type="button" class="inline-flex items-center justify-center p-2 rounded-md text-gray-400 hover:text-white hover:bg-white/10 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-white" aria-controls="mobile-menu" aria-expanded="false">
-                                <span class="sr-only">Open main menu</span>
-                                <!-- Icon when menu is closed -->
-                                <svg x-show="!open" class="block h-6 w-6" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" aria-hidden="true">
-                                    <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" />
-                                </svg>
-                                <!-- Icon when menu is open -->
-                                <svg x-show="open" x-cloak class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" aria-hidden="true">
-                                    <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
-                                </svg>
+<body class="h-full bg-[#0f172a] text-gray-200">
+    <div x-data="{ sidebarOpen: false }" class="min-h-full">
+        <!-- Sidebar for Mobile -->
+        <div x-show="sidebarOpen" class="relative z-50 lg:hidden" role="dialog" aria-modal="true">
+            <div class="fixed inset-0 bg-gray-900/80 backdrop-blur-sm"></div>
+            <div @click.away="sidebarOpen = false" class="fixed inset-0 flex">
+                <div class="relative mr-16 flex w-full max-w-xs flex-1">
+                    <div class="flex grow flex-col gap-y-5 overflow-y-auto bg-[#1a1a2e] px-6 pb-4 border-r border-white/5">
+                        <div class="flex h-16 shrink-0 items-center justify-between">
+                            <a href="/" class="text-2xl font-bold bg-gradient-to-r from-blue-400 to-emerald-400 bg-clip-text text-transparent">S3C</a>
+                            <button @click="sidebarOpen = false" class="-m-2.5 p-2.5 text-gray-400">
+                                <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>
                             </button>
                         </div>
+                        <nav class="flex flex-1 flex-col">
+                            <ul role="list" class="flex flex-1 flex-col gap-y-7">
+                                <li>
+                                    <ul role="list" class="-mx-2 space-y-1">
+                                        @php
+                                            $links = [
+                                                ['name' => 'Dashboard', 'route' => 'dashboard', 'icon' => '🏠'],
+                                                ['name' => 'Data Bundle', 'route' => 'vtu.data.index', 'icon' => '📶'],
+                                                ['name' => 'Airtime', 'route' => 'vtu.data.index', 'icon' => '📞'],
+                                                ['name' => 'My Wallet', 'route' => 'wallet.index', 'icon' => '💳'],
+                                            ];
+                                        @endphp
+                                        @foreach($links as $link)
+                                            <li>
+                                                <a href="{{ route($link['route']) }}" class="{{ request()->routeIs($link['route']) ? 'bg-white/5 text-blue-400 border-l-2 border-blue-400' : 'text-gray-400 hover:text-white hover:bg-white/5' }} flex gap-x-3 rounded-md p-3 text-sm leading-6 font-semibold transition-all">
+                                                    <span>{{ $link['icon'] }}</span>
+                                                    {{ $link['name'] }}
+                                                </a>
+                                            </li>
+                                        @endforeach
+                                    </ul>
+                                </li>
+                            </ul>
+                        </nav>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Static Sidebar for Desktop -->
+        <div class="hidden lg:fixed lg:inset-y-0 lg:z-50 lg:flex lg:w-72 lg:flex-col">
+            <div class="flex grow flex-col gap-y-5 overflow-y-auto bg-[#1a1a2e]/50 backdrop-blur-xl border-r border-white/5 px-6 pb-4">
+                <div class="flex h-20 shrink-0 items-center">
+                    <a href="/" class="text-3xl font-bold bg-gradient-to-r from-blue-400 to-emerald-400 bg-clip-text text-transparent">S3C</a>
+                </div>
+                <nav class="flex flex-1 flex-col">
+                    <ul role="list" class="flex flex-1 flex-col gap-y-7">
+                        <li>
+                            <ul role="list" class="-mx-2 space-y-2 mt-4">
+                                @foreach($links as $link)
+                                    <li>
+                                        <a href="{{ route($link['route']) }}" class="{{ request()->routeIs($link['route']) ? 'bg-blue-500/10 text-blue-400 border-l-4 border-blue-500' : 'text-gray-400 hover:text-white hover:bg-white/5' }} group flex gap-x-3 rounded-r-xl p-3 text-sm leading-6 font-bold transition-all">
+                                            <span class="text-xl opacity-70 group-hover:scale-110 transition-transform">{{ $link['icon'] }}</span>
+                                            {{ $link['name'] }}
+                                        </a>
+                                    </li>
+                                @endforeach
+                            </ul>
+                        </li>
+                        
+                        <li class="mt-auto">
+                            <form method="POST" action="{{ route('logout') }}">
+                                @csrf
+                                <button type="submit" class="-mx-2 flex gap-x-3 rounded-md p-2 text-sm font-semibold leading-6 text-gray-400 hover:bg-red-500/10 hover:text-red-400 w-full text-left transition-all">
+                                    <span>🚪</span>
+                                    Logout
+                                </button>
+                            </form>
+                        </li>
+                    </ul>
+                </nav>
+            </div>
+        </div>
+
+        <!-- Main Content Wrapper -->
+        <div class="lg:pl-72 flex flex-col min-h-screen">
+            <!-- Topbar -->
+            <div class="sticky top-0 z-40 flex h-16 shrink-0 items-center gap-x-4 border-b border-white/5 bg-[#0f172a]/80 backdrop-blur-md px-4 shadow-sm sm:gap-x-6 sm:px-6 lg:px-8">
+                <button @click="sidebarOpen = true" type="button" class="-m-2.5 p-2.5 text-gray-400 lg:hidden">
+                    <span class="sr-only">Open sidebar</span>
+                    <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" /></svg>
+                </button>
+
+                <!-- Separator -->
+                <div class="h-6 w-px bg-white/5 lg:hidden" aria-hidden="true"></div>
+
+                <div class="flex flex-1 gap-x-4 self-stretch lg:gap-x-6 justify-between items-center">
+                    <div class="text-sm font-medium text-gray-400">
+                        @yield('header')
+                    </div>
+                    
+                    <div class="flex items-center gap-x-4 lg:gap-x-6">
+                        @auth
+                            <div class="flex flex-col items-end">
+                                <span class="text-xs font-bold text-blue-400 uppercase tracking-widest">{{ auth()->user()->role }}</span>
+                                <span class="text-sm font-semibold text-white">{{ auth()->user()->name }}</span>
+                            </div>
+                            <div class="h-10 w-10 rounded-xl bg-gradient-to-br from-blue-500 to-emerald-500 p-[1px]">
+                                <div class="h-full w-full rounded-[10px] bg-[#1a1a2e] flex items-center justify-center font-bold text-white uppercase">
+                                    {{ substr(auth()->user()->name, 0, 1) }}
+                                </div>
+                            </div>
+                        @endauth
                     </div>
                 </div>
             </div>
 
-            <!-- Mobile menu, show/hide based on menu state. -->
-            <div x-show="open" @click.away="open = false" x-cloak class="md:hidden" id="mobile-menu">
-                <div class="space-y-1 px-2 pb-3 pt-2 sm:px-3 bg-[#0f172a]/95 backdrop-blur-lg border-b border-white/10">
-                    <a href="{{ route('home') }}" class="text-gray-300 hover:bg-white/10 block px-3 py-2 rounded-md text-base font-medium">Home</a>
-                    <a href="{{ route('vtu.data.index') }}" class="text-gray-300 hover:bg-white/10 block px-3 py-2 rounded-md text-base font-medium">Data Bundle</a>
-                    <a href="#about" @click="open = false" class="text-gray-300 hover:bg-white/10 block px-3 py-2 rounded-md text-base font-medium">About Us</a>
-                    <a href="#contact" @click="open = false" class="text-gray-300 hover:bg-white/10 block px-3 py-2 rounded-md text-base font-medium">Contact</a>
-                    @guest
-                        <a href="{{ route('login') }}" class="text-gray-300 hover:bg-white/10 block px-3 py-2 rounded-md text-base font-medium">Login</a>
-                    @endguest
-                    @auth
-                        <a href="{{ route('dashboard') }}" class="text-gray-300 hover:bg-white/10 block px-3 py-2 rounded-md text-base font-medium">Dashboard</a>
-                        <form method="POST" action="{{ route('logout') }}">
-                            @csrf
-                            <button type="submit" class="text-left w-full text-gray-300 hover:bg-white/10 block px-3 py-2 rounded-md text-base font-medium">Logout</button>
-                        </form>
-                    @endauth
+            <main class="py-10 flex-1">
+                <div class="px-4 sm:px-6 lg:px-8">
+                    @if(session('success'))
+                        <div class="mb-8 glass border-emerald-500/50 bg-emerald-500/10 p-4 rounded-xl text-emerald-400 flex items-center gap-3">
+                            <span class="text-xl">✅</span>
+                            {{ session('success') }}
+                        </div>
+                    @endif
+
+                    @if(session('error'))
+                        <div class="mb-8 glass border-red-500/50 bg-red-500/10 p-4 rounded-xl text-red-400 flex items-center gap-3">
+                            <span class="text-xl">❌</span>
+                            {{ session('error') }}
+                        </div>
+                    @endif
+
+                    @yield('content')
                 </div>
-            </div>
-        </nav>
-
-        <header class="py-10">
-            <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-                <h1 class="text-3xl font-bold tracking-tight text-white">@yield('header')</h1>
-            </div>
-        </header>
-
-        <main>
-            <div class="mx-auto max-w-7xl pb-12 px-4 sm:px-6 lg:px-8">
-                @if(session('success'))
-                    <div class="mb-4 glass border-emerald-500/50 bg-emerald-500/10 p-4 rounded-xl text-emerald-400">
-                        {{ session('success') }}
+            </main>
+            
+            <footer class="py-6 border-t border-white/5 px-4 sm:px-6 lg:px-8">
+                <div class="flex flex-col md:flex-row justify-between items-center gap-4 text-[10px] text-gray-500 uppercase font-bold tracking-widest">
+                    <span>© {{ date('Y') }} {{ config('app.name') }}</span>
+                    <div class="flex gap-6">
+                        <a href="#" class="hover:text-blue-400">Support</a>
+                        <a href="#" class="hover:text-blue-400">Terms</a>
                     </div>
-                @endif
-
-                @if(session('error'))
-                    <div class="mb-4 glass border-red-500/50 bg-red-500/10 p-4 rounded-xl text-red-400">
-                        {{ session('error') }}
-                    </div>
-                @endif
-
-                @yield('content')
-            </div>
-        </main>
+                </div>
+            </footer>
+        </div>
     </div>
 </body>
 </html>

@@ -120,6 +120,71 @@ class EpinsVTUService implements VTUProviderInterface
     }
 
     /**
+     * Fetch all data plans from EPINS
+     */
+    public function fetchDataPlans(): VTUResponse
+    {
+        try {
+            $response = Http::timeout(30)
+                ->withToken($this->bearerToken)
+                ->get($this->baseUrl . 'data');
+
+            if (!$response->successful()) {
+                return VTUResponse::failure('EPINS API failed to fetch data plans', ['raw' => $response->json() ?? []]);
+            }
+
+            return VTUResponse::success('Data plans retrieved', $response->json());
+
+        } catch (\Throwable $e) {
+            return VTUResponse::failure('Exception during data plans fetch: ' . $e->getMessage());
+        }
+    }
+
+    /**
+     * Sync data plans to local database
+     */
+    public function syncDataPlans(): VTUResponse
+    {
+        $response = $this->fetchDataPlans();
+        if (!$response->success) {
+            return $response;
+        }
+
+        $data = $response->data;
+        
+        // EPINS usually returns plans in 'description' or directly in the response
+        $plans = $data['description'] ?? $data['data'] ?? null;
+
+        if (!is_array($plans)) {
+            return VTUResponse::failure('Invalid data plan format received from EPINS', $data);
+        }
+
+        $count = 0;
+        foreach ($plans as $plan) {
+            if (!isset($plan['plancode'])) continue;
+
+            \App\Models\DataPlan::updateOrCreate(
+                ['provider' => 'epins', 'code' => $plan['plancode']],
+                [
+                    'network'        => $this->reverseMapNetwork($plan['network'] ?? ''),
+                    'name'           => $plan['plan_name'] ?? ($plan['name'] ?? 'Unknown Plan'),
+                    'provider_price' => $plan['amount'] ?? 0,
+                    // We only set selling_price if it's a new record to avoid overriding admin markups
+                    'selling_price'  => \App\Models\DataPlan::where('provider', 'epins')
+                        ->where('code', $plan['plancode'])
+                        ->exists() 
+                        ? \DB::raw('selling_price') 
+                        : ($plan['amount'] ?? 0),
+                    'is_active'      => true,
+                ]
+            );
+            $count++;
+        }
+
+        return VTUResponse::success("Successfully synced $count data plans");
+    }
+
+    /**
      * Map network names to EPINS codes
      */
     protected function mapNetwork(string $network): string
@@ -130,6 +195,20 @@ class EpinsVTUService implements VTUProviderInterface
             '9MOBILE' => '03',
             'GLO'     => '02',
             default    => $network,
+        };
+    }
+
+    /**
+     * Map EPINS codes to network names
+     */
+    protected function reverseMapNetwork(string $code): string
+    {
+        return match ($code) {
+            '01' => 'MTN',
+            '02' => 'GLO',
+            '03' => '9MOBILE',
+            '04' => 'AIRTEL',
+            default => $code,
         };
     }
 }

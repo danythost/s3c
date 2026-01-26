@@ -9,9 +9,11 @@ class WalletController extends Controller
 {
     public function index(Request $request)
     {
-        $wallet = $request->user()?->wallet;
-        $transactions = $request->user()?->transactions()->latest()->take(10)->get();
+        $user = $request->user();
+        $wallet = $user?->wallet;
+        $transactions = $user?->transactions()->latest()->take(10)->get();
+        $virtualAccount = $user?->virtualAccount;
 
-        return view('wallet.index', compact('wallet', 'transactions'));
+        return view('wallet.index', compact('wallet', 'transactions', 'virtualAccount'));
     }
 }

@@ -4,62 +4,99 @@
 @section('header', 'Welcome back, ' . auth()->user()->name)
 
 @section('content')
-<div class="grid grid-cols-1 md:grid-cols-2 gap-8">
-    <!-- Wallet Overview -->
-    <div class="glass p-8 rounded-2xl shadow-2xl border-l-4 border-emerald-500">
-        <h3 class="text-sm font-medium text-gray-400 uppercase tracking-wider">Wallet Balance</h3>
-        <p class="mt-2 text-3xl font-bold">₦ {{ number_format(auth()->user()->wallet->balance ?? 0, 2) }}</p>
-        <div class="mt-6">
-            <a href="{{ route('wallet.index') }}" class="text-sm text-emerald-400 hover:text-emerald-300 font-medium">View History →</a>
-        </div>
-    </div>
-
-    <!-- Quick Stats -->
-    <div class="glass p-8 rounded-2xl shadow-2xl border-l-4 border-blue-500">
-        <h3 class="text-sm font-medium text-gray-400 uppercase tracking-wider">Total Orders</h3>
-        <p class="mt-2 text-3xl font-bold">{{ auth()->user()->orders()->count() }}</p>
-        <div class="mt-6">
-            <span class="text-xs text-blue-400 bg-blue-400/10 px-2 py-1 rounded-full">All time</span>
-        </div>
-    </div>
-</div>
-
-<div class="mt-12 grid grid-cols-1 lg:grid-cols-2 gap-8">
-    <!-- Quick Actions -->
-    <div class="glass p-8 rounded-2xl shadow-2xl">
-        <h3 class="text-xl font-bold mb-6">Quick Actions</h3>
-        <div class="grid grid-cols-2 gap-4">
-            <a href="{{ route('vtu.data.index') }}" class="glass p-6 rounded-xl hover:bg-white/10 transition-all text-center group">
-                <div class="text-3xl mb-3 group-hover:scale-110 transition-transform">📱</div>
-                <span class="block font-bold">Buy Data</span>
-                <span class="text-xs text-gray-500">Fast & Secure</span>
-            </a>
-            <a href="#" class="glass p-6 rounded-xl hover:bg-white/10 transition-all text-center group">
-                <div class="text-3xl mb-3 group-hover:scale-110 transition-transform">📞</div>
-                <span class="block font-bold">Buy Airtime</span>
-                <span class="text-xs text-gray-500">All Networks</span>
-            </a>
-        </div>
-    </div>
-
-    <!-- Recent Activity -->
-    <div class="glass p-8 rounded-2xl shadow-2xl">
-        <h3 class="text-xl font-bold mb-6">Recent Activity</h3>
-        <div class="space-y-4">
-            @forelse(auth()->user()->orders()->latest()->take(5)->get() as $order)
-                <div class="flex items-center justify-between p-4 glass rounded-xl border-white/5">
-                    <div>
-                        <p class="font-semibold text-sm">{{ ucfirst($order->type) }} Purchase</p>
-                        <span class="text-xs text-gray-500">{{ $order->created_at->diffForHumans() }}</span>
-                    </div>
-                    <div class="text-right">
-                        <p class="font-bold">₦{{ number_format($order->amount, 2) }}</p>
-                        <span class="text-[10px] uppercase {{ $order->status == 'success' ? 'text-emerald-400' : 'text-red-400' }}">{{ $order->status }}</span>
-                    </div>
+<div class="space-y-10">
+    <!-- Hero / Balances -->
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div class="lg:col-span-2 glass bg-gradient-to-br from-blue-600/20 to-emerald-600/20 p-8 rounded-[2rem] border-white/10 relative overflow-hidden group">
+            <div class="absolute -top-24 -right-24 w-64 h-64 bg-blue-500/10 rounded-full blur-3xl group-hover:bg-blue-500/20 transition-all duration-500"></div>
+            
+            <div class="relative flex flex-col md:flex-row justify-between items-center gap-8">
+                <div>
+                    <span class="text-xs font-bold text-blue-400 uppercase tracking-[0.2em] mb-2 block">Personal Balance</span>
+                    <h2 class="text-5xl font-black text-white tracking-tighter">₦ {{ number_format(auth()->user()->wallet->balance ?? 0, 2) }}</h2>
+                    <p class="text-sm text-gray-400 mt-4 max-w-xs leading-relaxed">Your funds are ready for instant top-ups across all available networks and services.</p>
                 </div>
-            @empty
-                <p class="text-center py-10 text-gray-500 italic">No recent activity</p>
-            @endforelse
+                <div class="flex gap-4">
+                    <a href="{{ route('wallet.index') }}" class="bg-white text-gray-900 px-8 py-4 rounded-2xl font-bold text-sm shadow-xl hover:bg-gray-100 transition-all transform hover:scale-105">
+                        Add Funds
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <div class="glass p-8 rounded-[2rem] border-white/5 flex flex-col justify-center">
+            <span class="text-xs font-bold text-gray-500 uppercase tracking-widest mb-4 block">Usage Stats</span>
+            <div class="flex items-end gap-3">
+                <span class="text-4xl font-black text-white">{{ auth()->user()->orders()->count() }}</span>
+                <span class="text-sm text-gray-500 mb-1 font-bold italic">Total Orders</span>
+            </div>
+            <div class="mt-6 h-1 w-full bg-white/5 rounded-full overflow-hidden">
+                <div class="h-full bg-emerald-500 w-2/3 rounded-full"></div>
+            </div>
+            <p class="text-[10px] text-gray-500 mt-3 uppercase font-black">System Status: <span class="text-emerald-400">Optimal</span></p>
+        </div>
+    </div>
+
+    <!-- Main Grid -->
+    <div class="grid grid-cols-1 xl:grid-cols-3 gap-10">
+        <!-- Quick Services -->
+        <div class="xl:col-span-2 space-y-6">
+            <div class="flex items-center justify-between">
+                <h3 class="text-xl font-bold text-white tracking-tight">Available Services</h3>
+                <span class="text-xs text-gray-500 font-bold uppercase tracking-widest">Instant Delivery</span>
+            </div>
+            
+            <div class="grid grid-cols-2 sm:grid-cols-3 gap-4">
+                @php
+                    $services = [
+                        ['name' => 'Data Bundle', 'icon' => '📶', 'desc' => 'MTN, GLO, Airtel...', 'route' => 'vtu.data.index', 'color' => 'blue'],
+                        ['name' => 'Airtime', 'icon' => '📞', 'desc' => 'Instant Top-up', 'route' => 'vtu.data.index', 'color' => 'emerald'],
+                        ['name' => 'Electricity', 'icon' => '⚡', 'desc' => 'Pay Utility Bills', 'route' => '#', 'color' => 'yellow'],
+                        ['name' => 'Cable TV', 'icon' => '📺', 'desc' => 'DSTV, GOTV...', 'route' => '#', 'color' => 'purple'],
+                        ['name' => 'Education', 'icon' => '🎓', 'desc' => 'WAEC/JAMB Pins', 'route' => '#', 'color' => 'red'],
+                        ['name' => 'Settings', 'icon' => '⚙️', 'desc' => 'Manage Profile', 'route' => '#', 'color' => 'gray'],
+                    ];
+                @endphp
+
+                @foreach($services as $service)
+                    <a href="{{ $service['route'] !== '#' ? route($service['route']) : '#' }}" class="glass p-6 rounded-3xl border-white/5 hover:bg-white/10 hover:border-white/20 transition-all group overflow-hidden relative">
+                        <div class="absolute -bottom-4 -right-4 text-6xl opacity-[0.03] group-hover:opacity-[0.07] transition-opacity">{{ $service['icon'] }}</div>
+                        <div class="w-12 h-12 rounded-2xl bg-{{ $service['color'] }}-500/10 flex items-center justify-center text-2xl mb-4 group-hover:scale-110 transition-transform">
+                            {{ $service['icon'] }}
+                        </div>
+                        <h4 class="font-bold text-white text-sm">{{ $service['name'] }}</h4>
+                        <p class="text-[10px] text-gray-500 mt-1 uppercase font-bold tracking-tighter">{{ $service['desc'] }}</p>
+                    </a>
+                @endforeach
+            </div>
+        </div>
+
+        <!-- Right Side: Recent Activity -->
+        <div class="space-y-6">
+            <h3 class="text-xl font-bold text-white tracking-tight">Recent Activity</h3>
+            <div class="space-y-3">
+                @forelse(auth()->user()->orders()->latest()->take(6)->get() as $order)
+                    <div class="flex items-center justify-between p-4 glass rounded-[1.5rem] border-white/5 hover:bg-white/5 transition-colors">
+                        <div class="flex items-center gap-4">
+                            <div class="w-10 h-10 rounded-xl bg-white/5 flex items-center justify-center text-lg">
+                                {{ $order->type === 'vtu-data' ? '📶' : '💳' }}
+                            </div>
+                            <div>
+                                <p class="text-xs font-bold text-white">{{ ucfirst(str_replace('-', ' ', $order->type)) }}</p>
+                                <p class="text-[10px] text-gray-500">{{ $order->created_at->diffForHumans() }}</p>
+                            </div>
+                        </div>
+                        <div class="text-right">
+                            <p class="text-sm font-black text-white">₦{{ number_format($order->amount, 2) }}</p>
+                            <span class="text-[9px] uppercase font-black {{ $order->status == 'success' ? 'text-emerald-400' : 'text-red-400' }}">{{ $order->status }}</span>
+                        </div>
+                    </div>
+                @empty
+                    <div class="text-center py-20 glass rounded-[2rem] border-white/5">
+                        <p class="text-gray-500 italic text-sm">No transactions yet</p>
+                    </div>
+                @endforelse
+            </div>
         </div>
     </div>
 </div>

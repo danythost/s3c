@@ -6,7 +6,7 @@ use App\Contracts\VTU\VTUProviderInterface;
 use App\Actions\Wallet\DebitWallet;
 use App\Actions\Wallet\ReverseWallet;
 use App\Models\Order;
-use App\Models\Transaction;
+use App\Models\WalletTransaction;
 use App\Models\User;
 use App\Domains\VTU\VTUResponse;
 use Illuminate\Support\Facades\DB;
@@ -55,13 +55,14 @@ class PurchaseData
 
                     $order->update(['status' => 'failed']);
 
-                    Transaction::create([
+                    WalletTransaction::create([
                         'user_id'   => $userId,
                         'order_id'  => $order->id,
                         'reference' => $response->reference ?? $orderReference,
                         'type'      => 'reversal',
                         'amount'    => $amount,
                         'status'    => 'success',
+                        'source'    => 'epins',
                         'meta'      => $response->data,
                     ]);
 
@@ -71,13 +72,14 @@ class PurchaseData
                 // 5. Success
                 $order->update(['status' => 'success']);
 
-                Transaction::create([
+                WalletTransaction::create([
                     'user_id'   => $userId,
                     'order_id'  => $order->id,
                     'reference' => $response->reference ?? $orderReference,
                     'type'      => 'debit',
                     'amount'    => $amount,
                     'status'    => 'success',
+                    'source'    => 'epins',
                     'meta'      => $response->data,
                 ]);
 

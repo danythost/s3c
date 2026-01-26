@@ -21,6 +21,7 @@ class User extends Authenticatable
         'name',
         'email',
         'password',
+        'role',
     ];
 
     /**
@@ -46,9 +47,24 @@ class User extends Authenticatable
         ];
     }
 
+    public function isAdmin(): bool
+    {
+        return $this->role === 'admin';
+    }
+
     public function wallet()
     {
         return $this->hasOne(Wallet::class);
+    }
+
+    public function virtualAccount()
+    {
+        return $this->hasOne(VirtualAccount::class);
+    }
+
+    public function transactions()
+    {
+        return $this->hasMany(WalletTransaction::class);
     }
 
     public function orders()

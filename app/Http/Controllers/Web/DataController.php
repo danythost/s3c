@@ -13,7 +13,12 @@ class DataController extends Controller
      */
     public function index()
     {
-        return view('vtu.data.index');
+        $plans = \App\Models\DataPlan::where('is_active', true)
+            ->where('provider', 'epins')
+            ->get()
+            ->groupBy('network');
+
+        return view('vtu.data.index', compact('plans'));
     }
 
     /**
@@ -24,11 +29,19 @@ class DataController extends Controller
         $validated = $request->validate([
             'phone' => ['required', 'string', 'digits:11'],
             'network' => ['required', 'string'],
-            'plan_id' => ['required', 'string'],
-            'amount' => ['required', 'numeric', 'min:1'],
+            'plan_id' => ['required', 'exists:data_plans,id'],
         ]);
 
-        $response = $purchaseData->execute($request->user(), $validated);
+        $plan = \App\Models\DataPlan::findOrFail($validated['plan_id']);
+
+        $payload = [
+            'phone'     => $validated['phone'],
+            'network'   => $validated['network'],
+            'plan_code' => $plan->code,
+            'amount'    => $plan->selling_price,
+        ];
+
+        $response = $purchaseData->execute($request->user(), $payload);
 
         if ($response->success) {
             return back()->with('success', $response->message);

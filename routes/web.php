@@ -33,3 +33,17 @@ Route::middleware(['auth'])->group(function () {
     // Auth
     Route::post('/logout', [LoginController::class, 'logout'])->name('logout');
 });
+
+// Admin Routes
+Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(function () {
+    Route::get('/dashboard', [\App\Http\Controllers\Admin\DashboardController::class, 'index'])->name('dashboard');
+    
+    // VTU Management
+    Route::get('/vtu/plans', [\App\Http\Controllers\Admin\VTUManagementController::class, 'plans'])->name('vtu.plans');
+    Route::patch('/vtu/plans/{plan}/price', [\App\Http\Controllers\Admin\VTUManagementController::class, 'updatePrice'])->name('vtu.plans.update-price');
+    Route::patch('/vtu/plans/{plan}/toggle', [\App\Http\Controllers\Admin\VTUManagementController::class, 'toggleStatus'])->name('vtu.plans.toggle-status');
+    Route::post('/vtu/sync-epins', [\App\Http\Controllers\Admin\VTUManagementController::class, 'syncEpins'])->name('vtu.sync-epins');
+});
+
+// Webhooks (Exclude from CSRF in bootstrap/app.php)
+Route::post('/webhooks/flutterwave', [\App\Http\Controllers\Webhooks\FlutterwaveWebhookController::class, 'handle']);

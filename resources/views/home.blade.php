@@ -54,13 +54,14 @@
     <!-- Services Overview -->
 
     <!-- Products Showcase (2x4 Grid) -->
-    <div class="max-w-7xl mx-auto mb-32 px-4">
-        <div class="text-center mb-16">
-            <h2 class="text-3xl lg:text-4xl font-bold text-white tracking-tight">Premium Shop Collection</h2>
-            <p class="text-gray-400 mt-4">Discover our curated selection of high-end fashion and lifestyle essentials.</p>
+    <div class="max-w-7xl mx-auto mb-40 px-4">
+        <div class="text-center mb-20 space-y-4">
+            <span class="text-blue-400 font-bold uppercase tracking-[0.3em] text-[10px]">Curated Marketplace</span>
+            <h2 class="text-4xl lg:text-5xl font-black text-white tracking-tighter">Premium Lifestyle Collection</h2>
+            <p class="text-gray-500 max-w-xl mx-auto text-lg leading-relaxed">Discover our exclusive selection of high-end fashion and specialized essentials, tailored for the modern individual.</p>
         </div>
         
-        <div class="grid grid-cols-2 md:grid-cols-4 gap-6">
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-8">
             @php
                 $products = [
                     ['name' => 'Oxford Leather Shoes', 'img' => 'shoes.png', 'price' => '₦45,000', 'tag' => 'Footwear'],
@@ -75,20 +76,24 @@
             @endphp
 
             @foreach($products as $product)
-                <div class="glass group rounded-2xl overflow-hidden hover:bg-white/5 transition-all duration-300 border border-white/5 hover:border-blue-500/30">
+                <div class="glass group rounded-[2.5rem] overflow-hidden hover:bg-white/10 transition-all duration-500 border border-white/5 hover:border-blue-500/30 relative">
                     <div class="aspect-square overflow-hidden relative">
                         <img src="{{ asset('images/products/' . $product['img']) }}" alt="{{ $product['name'] }}" 
-                             class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110">
-                        <div class="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity flex items-end p-4">
-                            <span class="text-[10px] uppercase tracking-widest text-blue-400 font-bold bg-blue-400/10 px-2 py-1 rounded">{{ $product['tag'] }}</span>
+                             class="w-full h-full object-cover transition-transform duration-700 bg-[#1a1a2e] group-hover:scale-110">
+                        <div class="absolute inset-0 bg-gradient-to-t from-[#0f172a] via-transparent to-transparent opacity-60"></div>
+                        <div class="absolute top-4 left-4">
+                            <span class="text-[9px] uppercase tracking-widest text-blue-400 font-black bg-[#0f172a]/80 backdrop-blur-md px-3 py-1.5 rounded-full border border-blue-500/20">{{ $product['tag'] }}</span>
                         </div>
                     </div>
-                    <div class="p-4">
-                        <h3 class="text-sm font-bold text-white mb-1 truncate">{{ $product['name'] }}</h3>
+                    <div class="p-6 space-y-4">
+                        <h3 class="text-sm font-black text-white truncate uppercase tracking-tight">{{ $product['name'] }}</h3>
                         <div class="flex items-center justify-between">
-                            <span class="text-blue-400 font-black text-sm">{{ $product['price'] }}</span>
-                            <button class="w-8 h-8 rounded-full bg-blue-500/20 text-blue-400 flex items-center justify-center hover:bg-blue-500 hover:text-white transition-all">
-                                <span class="text-lg">+</span>
+                            <div class="space-y-1">
+                                <p class="text-[10px] text-gray-500 font-bold uppercase">Price</p>
+                                <span class="text-white font-black text-md">{{ $product['price'] }}</span>
+                            </div>
+                            <button class="w-10 h-10 rounded-2xl bg-blue-500/10 text-blue-400 flex items-center justify-center hover:bg-blue-500 hover:text-white transition-all transform group-hover:scale-110">
+                                <span class="text-xl font-bold">+</span>
                             </button>
                         </div>
                     </div>
@@ -96,41 +101,43 @@
             @endforeach
         </div>
 
-        <div class="text-center mt-16">
-            <a href="{{ route('register') }}" class="inline-block bg-blue-600 hover:bg-blue-700 text-white px-12 py-4 rounded-2xl font-bold text-lg shadow-xl shadow-blue-500/20 transition-all transform hover:scale-105">
-                Explore Entire Shop
+        <div class="text-center mt-20">
+            <a href="{{ route('register') }}" class="inline-flex items-center gap-3 bg-white text-gray-900 px-12 py-5 rounded-[2rem] font-black text-lg shadow-2xl hover:bg-blue-50 shadow-blue-500/20 transition-all transform hover:scale-105 active:scale-95">
+                Explore Full Catalog
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M17 8l4 4m0 0l-4 4m4-4H3"/></svg>
             </a>
         </div>
     </div>
 
     <!-- How It Works -->
-    <div id="about" class="max-w-7xl mx-auto mb-32">
-        <div class="text-center mb-16">
-            <h2 class="text-3xl lg:text-4xl font-bold">How It Works</h2>
+    <div id="about" class="max-w-7xl mx-auto mb-40">
+        <div class="text-center mb-24 space-y-4">
+            <span class="text-emerald-400 font-bold uppercase tracking-[0.3em] text-[10px]">Seamless Experience</span>
+            <h2 class="text-4xl lg:text-5xl font-black text-white tracking-tighter">How S3C Simplifies Life</h2>
         </div>
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
-            <div class="glass p-8 rounded-3xl text-center relative overflow-hidden group">
-                <div class="absolute -top-4 -left-4 text-8xl font-black text-white/5 group-hover:text-blue-500/10 transition-colors">1</div>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-10">
+            <div class="glass p-10 rounded-[3rem] border-white/5 relative overflow-hidden group hover:bg-white/10 transition-all duration-500">
+                <div class="absolute -top-10 -left-10 text-[12rem] font-black text-white/5 opacity-40 group-hover:text-blue-500/10 transition-colors pointer-events-none">1</div>
                 <div class="relative">
-                    <div class="text-3xl mb-6 bg-blue-500/20 w-16 h-16 flex items-center justify-center rounded-2xl mx-auto text-blue-400 font-bold">01</div>
-                    <h3 class="text-xl font-bold mb-4">Create an Account</h3>
-                    <p class="text-gray-400 text-sm leading-relaxed">Sign up in minutes and get a secure wallet automatically.</p>
+                    <div class="text-3xl mb-8 bg-blue-500/10 w-20 h-20 flex items-center justify-center rounded-[2rem] text-blue-400 font-black border border-blue-500/20">01</div>
+                    <h3 class="text-2xl font-black mb-4 text-white">Create Profile</h3>
+                    <p class="text-gray-500 text-sm leading-relaxed font-bold">Secure registration in seconds. Your automated digital wallet is instantly provisioned upon signup.</p>
                 </div>
             </div>
-            <div class="glass p-8 rounded-3xl text-center relative overflow-hidden group">
-                <div class="absolute -top-4 -left-4 text-8xl font-black text-white/5 group-hover:text-emerald-500/10 transition-colors">2</div>
+            <div class="glass p-10 rounded-[3rem] border-white/5 relative overflow-hidden group hover:bg-white/10 transition-all duration-500">
+                <div class="absolute -top-10 -left-10 text-[12rem] font-black text-white/5 opacity-40 group-hover:text-emerald-500/10 transition-colors pointer-events-none">2</div>
                 <div class="relative">
-                    <div class="text-3xl mb-6 bg-emerald-500/20 w-16 h-16 flex items-center justify-center rounded-2xl mx-auto text-emerald-400 font-bold">02</div>
-                    <h3 class="text-xl font-bold mb-4">Fund Your Wallet</h3>
-                    <p class="text-gray-400 text-sm leading-relaxed">Add funds to your wallet and manage your balance with full transparency.</p>
+                    <div class="text-3xl mb-8 bg-emerald-500/10 w-20 h-20 flex items-center justify-center rounded-[2rem] text-emerald-400 font-black border border-emerald-500/20">02</div>
+                    <h3 class="text-2xl font-black mb-4 text-white">Smart Funding</h3>
+                    <p class="text-gray-500 text-sm leading-relaxed font-bold">Use your dedicated virtual bank account for real-time funding. Transact with confidence and total transparency.</p>
                 </div>
             </div>
-            <div class="glass p-8 rounded-3xl text-center relative overflow-hidden group">
-                <div class="absolute -top-4 -left-4 text-8xl font-black text-white/5 group-hover:text-purple-500/10 transition-colors">3</div>
+            <div class="glass p-10 rounded-[3rem] border-white/5 relative overflow-hidden group hover:bg-white/10 transition-all duration-500">
+                <div class="absolute -top-10 -left-10 text-[12rem] font-black text-white/5 opacity-40 group-hover:text-purple-500/10 transition-colors pointer-events-none">3</div>
                 <div class="relative">
-                    <div class="text-3xl mb-6 bg-purple-500/20 w-16 h-16 flex items-center justify-center rounded-2xl mx-auto text-purple-400 font-bold">03</div>
-                    <h3 class="text-xl font-bold mb-4">Shop & Top-Up</h3>
-                    <p class="text-gray-400 text-sm leading-relaxed">Select your data plan or choose from our fashion items. Secure checkout instantly.</p>
+                    <div class="text-3xl mb-8 bg-purple-500/10 w-20 h-20 flex items-center justify-center rounded-[2rem] text-purple-400 font-black border border-purple-500/20">03</div>
+                    <h3 class="text-2xl font-black mb-4 text-white">Shop & Deliver</h3>
+                    <p class="text-gray-500 text-sm leading-relaxed font-bold">Instantly top-up data or explore our premium marketplace. Experience lightning-fast delivery on all services.</p>
                 </div>
             </div>
         </div>

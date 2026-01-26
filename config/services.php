@@ -35,4 +35,17 @@ return [
         ],
     ],
 
+    'epins' => [
+        'base_url' => env('EPINS_BASE_URL'),
+        'api_key'  => env('EPINS_API_KEY'),
+    ],
+
+    'flutterwave' => [
+        'public_key'     => env('FLW_PUBLIC_KEY'),
+        'secret_key'     => env('FLW_SECRET_KEY'),
+        'encryption_key' => env('FLW_ENCRYPTION_KEY'),
+        'secret_hash'    => env('FLW_SECRET_HASH'),
+        'test_bvn'       => env('FLW_TEST_BVN'),
+    ],
+
 ];
