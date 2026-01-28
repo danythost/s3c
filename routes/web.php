@@ -49,6 +49,9 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
 
     // Product Management
     Route::resource('products', \App\Http\Controllers\Admin\ProductController::class);
+
+    // User Management
+    Route::resource('users', \App\Http\Controllers\Admin\UserController::class);
 });
 
 // Webhooks (Exclude from CSRF in bootstrap/app.php)
