@@ -28,7 +28,7 @@
                 <a href="{{ route('vtu.data.index') }}" class="bg-blue-600 hover:bg-blue-700 text-white px-10 py-4 rounded-2xl font-bold text-lg shadow-xl shadow-blue-500/20 transition-all transform hover:scale-105">
                     Buy Data Now
                 </a>
-                <a href="{{ route('register') }}" class="glass hover:bg-white/10 text-white px-10 py-4 rounded-2xl font-bold text-lg transition-all">
+                <a href="{{ route('shop') }}" class="glass hover:bg-white/10 text-white px-10 py-4 rounded-2xl font-bold text-lg transition-all">
                     Shop Here
                 </a>
             @endauth
@@ -62,35 +62,28 @@
         </div>
         
         <div class="grid grid-cols-2 md:grid-cols-4 gap-8">
-            @php
-                $products = [
-                    ['name' => 'Oxford Leather Shoes', 'img' => 'shoes.png', 'price' => '₦45,000', 'tag' => 'Footwear'],
-                    ['name' => 'Designer Handbag', 'img' => 'bag.png', 'price' => '₦32,500', 'tag' => 'Accessories'],
-                    ['name' => 'Luxury Business Suit', 'img' => 'suit.png', 'price' => '₦120,000', 'tag' => 'Clothing'],
-                    ['name' => 'Streetwear Snapback', 'img' => 'cap.png', 'price' => '₦8,500', 'tag' => 'Headwear'],
-                    ['name' => 'Swiss Chronograph', 'img' => 'watch.png', 'price' => '₦85,000', 'tag' => 'Luxury'],
-                    ['name' => 'Premium Wallet', 'img' => 'bag.png', 'price' => '₦15,000', 'tag' => 'Accessories'],
-                    ['name' => 'Designer Belt', 'img' => 'suit.png', 'price' => '₦12,000', 'tag' => 'Accessories'],
-                    ['name' => 'Minimalist Sneakers', 'img' => 'shoes.png', 'price' => '₦28,000', 'tag' => 'Footwear'],
-                ];
-            @endphp
-
-            @foreach($products as $product)
+            @forelse($products as $product)
                 <div class="glass group rounded-[2.5rem] overflow-hidden hover:bg-white/10 transition-all duration-500 border border-white/5 hover:border-blue-500/30 relative">
                     <div class="aspect-square overflow-hidden relative">
-                        <img src="{{ asset('images/products/' . $product['img']) }}" alt="{{ $product['name'] }}" 
-                             class="w-full h-full object-cover transition-transform duration-700 bg-[#1a1a2e] group-hover:scale-110">
+                        @if($product->image_url)
+                            <img src="{{ $product->image_url }}" alt="{{ $product->name }}" 
+                                 class="w-full h-full object-cover transition-transform duration-700 bg-[#1a1a2e] group-hover:scale-110">
+                        @else
+                            <div class="w-full h-full bg-[#1a1a2e] flex items-center justify-center">
+                                <svg class="w-12 h-12 text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+                            </div>
+                        @endif
                         <div class="absolute inset-0 bg-gradient-to-t from-[#0f172a] via-transparent to-transparent opacity-60"></div>
                         <div class="absolute top-4 left-4">
-                            <span class="text-[9px] uppercase tracking-widest text-blue-400 font-black bg-[#0f172a]/80 backdrop-blur-md px-3 py-1.5 rounded-full border border-blue-500/20">{{ $product['tag'] }}</span>
+                            <span class="text-[9px] uppercase tracking-widest text-blue-400 font-black bg-[#0f172a]/80 backdrop-blur-md px-3 py-1.5 rounded-full border border-blue-500/20">{{ $product->category ?: 'Product' }}</span>
                         </div>
                     </div>
                     <div class="p-6 space-y-4">
-                        <h3 class="text-sm font-black text-white truncate uppercase tracking-tight">{{ $product['name'] }}</h3>
+                        <h3 class="text-sm font-black text-white truncate uppercase tracking-tight">{{ $product->name }}</h3>
                         <div class="flex items-center justify-between">
                             <div class="space-y-1">
                                 <p class="text-[10px] text-gray-500 font-bold uppercase">Price</p>
-                                <span class="text-white font-black text-md">{{ $product['price'] }}</span>
+                                <span class="text-white font-black text-md">₦{{ number_format($product->price, 2) }}</span>
                             </div>
                             <button class="w-10 h-10 rounded-2xl bg-blue-500/10 text-blue-400 flex items-center justify-center hover:bg-blue-500 hover:text-white transition-all transform group-hover:scale-110">
                                 <span class="text-xl font-bold">+</span>
@@ -98,11 +91,15 @@
                         </div>
                     </div>
                 </div>
-            @endforeach
+            @empty
+                <div class="col-span-full py-20 text-center">
+                    <p class="text-gray-500 font-bold italic">New premium collection arriving soon. Stay tuned!</p>
+                </div>
+            @endforelse
         </div>
 
         <div class="text-center mt-20">
-            <a href="{{ route('register') }}" class="inline-flex items-center gap-3 bg-white text-gray-900 px-12 py-5 rounded-[2rem] font-black text-lg shadow-2xl hover:bg-blue-50 shadow-blue-500/20 transition-all transform hover:scale-105 active:scale-95">
+            <a href="{{ route('shop') }}" class="inline-flex items-center gap-3 bg-white text-gray-900 px-12 py-5 rounded-[2rem] font-black text-lg shadow-2xl hover:bg-blue-50 shadow-blue-500/20 transition-all transform hover:scale-105 active:scale-95">
                 Explore Full Catalog
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M17 8l4 4m0 0l-4 4m4-4H3"/></svg>
             </a>

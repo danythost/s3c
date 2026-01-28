@@ -58,7 +58,7 @@
                                             ];
 
                                             $marketingLinks = [
-                                                ['name' => 'Shop', 'url' => '#shop', 'icon' => '🛍️'],
+                                                ['name' => 'Shop', 'route' => 'shop', 'icon' => '🛍️'],
                                                 ['name' => 'About Us', 'url' => '#about', 'icon' => '📖'],
                                                 ['name' => 'Developers', 'url' => '#', 'icon' => '👨‍💻'],
                                                 ['name' => 'Contact', 'url' => '#contact', 'icon' => '✉️'],

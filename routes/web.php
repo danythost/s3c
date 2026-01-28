@@ -8,8 +8,11 @@ use App\Http\Controllers\Auth\LoginController; // User created this one
 use App\Http\Controllers\Auth\RegisterController; // User created this one
 
 Route::get('/', function () {
-    return view('home');
+    $products = \App\Models\Product::where('status', 'active')->latest()->take(8)->get();
+    return view('home', compact('products'));
 })->name('home');
+
+Route::get('/shop', [\App\Http\Controllers\Web\ShopController::class, 'index'])->name('shop');
 
 // Guest Routes
 Route::middleware('guest')->group(function () {
@@ -43,6 +46,9 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
     Route::patch('/vtu/plans/{plan}/price', [\App\Http\Controllers\Admin\VTUManagementController::class, 'updatePrice'])->name('vtu.plans.update-price');
     Route::patch('/vtu/plans/{plan}/toggle', [\App\Http\Controllers\Admin\VTUManagementController::class, 'toggleStatus'])->name('vtu.plans.toggle-status');
     Route::post('/vtu/sync-epins', [\App\Http\Controllers\Admin\VTUManagementController::class, 'syncEpins'])->name('vtu.sync-epins');
+
+    // Product Management
+    Route::resource('products', \App\Http\Controllers\Admin\ProductController::class);
 });
 
 // Webhooks (Exclude from CSRF in bootstrap/app.php)
