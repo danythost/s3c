@@ -25,69 +25,88 @@ class PurchaseAirtime
      */
     public function execute(User $user, array $data): VTUResponse
     {
-        return DB::transaction(function () use ($user, $data) {
-            $orderReference = Str::uuid()->toString();
-            $amount = $data['amount'];
-            $userId = $user->id;
+        $reference = 'AIR-' . ($data['reference'] ?? 'AIR-' . Str::uuid());
+        $amount = $data['amount'];
+        $userId = $user->id;
 
-            try {
-                // 1. Debit wallet
+        // 1. Idempotency Check (Step 3 & 7)
+        $existing = WalletTransaction::where('reference', $reference)->first();
+        if ($existing) {
+            if ($existing->status === 'pending') {
+                return $this->processVTUCall($existing, $user, $data, $reference);
+            }
+            return VTUResponse::success('Transaction already processed: ' . $existing->status, $existing->meta, $reference);
+        }
+
+        try {
+            // 2. Initiate Transaction: Debit + Create Pending Record (Phase 1)
+            $txn = DB::transaction(function () use ($userId, $amount, $reference, $data) {
+                // Lock and Debit
                 $this->debitWallet->execute($userId, $amount);
 
-                // 2. Create order
-                $order = Order::create([
+                // Create Transaction record as Shield
+                return WalletTransaction::create([
                     'user_id'   => $userId,
-                    'reference' => $orderReference,
+                    'reference' => $reference,
                     'amount'    => $amount,
-                    'type'      => 'vtu-airtime',
+                    'type'      => 'debit',
                     'status'    => 'pending',
+                    'source'    => 'airtime',
+                    'meta'      => [
+                        'network' => $data['network'],
+                        'phone'   => $data['phone'],
+                    ],
                 ]);
+            });
 
-                // 3. Call VTU provider
-                $payload = array_merge($data, ['reference' => $orderReference]);
-                $response = $this->vtuProvider->purchaseAirtime($payload);
+            // 3. Process VTU Call (Phase 2)
+            return $this->processVTUCall($txn, $user, $data, $reference);
 
-                // 4. Handle failure
+        } catch (\Illuminate\Database\QueryException $e) {
+            // Database-level idempotency shield (Step 5)
+            return VTUResponse::failure('Duplicate transaction prevented', ['error' => $e->getMessage()]);
+        } catch (\Exception $e) {
+            return VTUResponse::failure('System error: ' . $e->getMessage());
+        }
+    }
+
+    /**
+     * Call the VTU provider and finalize the transaction
+     */
+    protected function processVTUCall(WalletTransaction $txn, User $user, array $data, string $reference): VTUResponse
+    {
+        $amount = $txn->amount;
+        $userId = $user->id;
+
+        try {
+            $payload = array_merge($data, ['reference' => $reference]);
+            $response = $this->vtuProvider->purchaseAirtime($payload);
+
+            return DB::transaction(function () use ($txn, $response, $userId, $amount) {
                 if (!$response->success) {
-                    // Reverse wallet
+                    // REFUND (Step 4 & 7)
                     $this->reverseWallet->execute($userId, $amount);
 
-                    $order->update(['status' => 'failed']);
-
-                    WalletTransaction::create([
-                        'user_id'   => $userId,
-                        'order_id'  => $order->id,
-                        'reference' => $response->reference ?? $orderReference,
-                        'type'      => 'reversal',
-                        'amount'    => $amount,
-                        'status'    => 'success',
-                        'source'    => 'epins',
-                        'meta'      => $response->data,
+                    $txn->update([
+                        'status' => 'failed',
+                        'meta'   => array_merge($txn->meta ?? [], $response->data ?? []),
                     ]);
 
                     return $response;
                 }
 
-                // 5. Success
-                $order->update(['status' => 'success']);
-
-                WalletTransaction::create([
-                    'user_id'   => $userId,
-                    'order_id'  => $order->id,
-                    'reference' => $response->reference ?? $orderReference,
-                    'type'      => 'debit',
-                    'amount'    => $amount,
-                    'status'    => 'success',
-                    'source'    => 'epins',
-                    'meta'      => $response->data,
+                // SUCCESS
+                $txn->update([
+                    'status' => 'success',
+                    'meta'   => array_merge($txn->meta ?? [], $response->data ?? []),
                 ]);
 
                 return $response;
+            });
 
-            } catch (\Exception $e) {
-                // Unexpected error
-                return VTUResponse::failure('System error: ' . $e->getMessage());
-            }
-        });
+        } catch (\Exception $e) {
+            // On unexpected exception (like provider timeout), we leave it as PENDING
+            return VTUResponse::failure('VTU call failed: ' . $e->getMessage() . '. You can retry safely.');
+        }
     }
 }

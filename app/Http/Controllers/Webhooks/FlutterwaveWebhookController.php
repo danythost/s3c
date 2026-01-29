@@ -75,7 +75,7 @@ class FlutterwaveWebhookController extends Controller
                 'amount'    => $amount,
                 'type'      => 'credit',
                 'status'    => 'success',
-                'source'    => 'flutterwave',
+                'source'    => 'wallet_funding',
                 'meta'      => $payload,
             ]);
         });
