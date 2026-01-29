@@ -45,7 +45,7 @@ class EpinsVTUService implements VTUProviderInterface
 
             $data = $response->json();
 
-            if (($data['status'] ?? '') !== 'success') {
+            if (($data['status'] ?? false) !== true && ($data['status'] ?? '') !== 'success') {
                 return VTUResponse::failure($data['message'] ?? 'VTU purchase failed', $data);
             }
 
@@ -68,10 +68,10 @@ class EpinsVTUService implements VTUProviderInterface
             $response = Http::timeout(30)
                 ->withToken($this->bearerToken)
                 ->post($this->baseUrl . 'airtime', [
-                    'network'    => $networkCode,
+                    'network'    => strtoupper($payload['network']),
                     'phone'      => $payload['phone'],
                     'amount'     => $payload['amount'],
-                    'reference'  => $reference,
+                    'ref'        => $reference,
                 ]);
 
             if (!$response->successful()) {
@@ -80,11 +80,11 @@ class EpinsVTUService implements VTUProviderInterface
 
             $data = $response->json();
 
-            if (($data['status'] ?? '') !== 'success') {
-                return VTUResponse::failure($data['message'] ?? 'Airtime purchase failed', $data);
+            if (($data['status'] ?? false) !== true) {
+                return VTUResponse::failure($data['description'] ?? ($data['message'] ?? 'Airtime purchase failed'), $data);
             }
 
-            return VTUResponse::success('Airtime purchase successful', $data, $reference);
+            return VTUResponse::success($data['description'] ?? 'Airtime purchase successful', $data, $reference);
 
         } catch (\Throwable $e) {
             return VTUResponse::failure('VTU service unreachable: ' . $e->getMessage());

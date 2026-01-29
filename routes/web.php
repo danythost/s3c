@@ -29,6 +29,9 @@ Route::middleware(['auth'])->group(function () {
     // VTU Routes
     Route::get('/vtu/data', [DataController::class, 'index'])->name('vtu.data.index');
     Route::post('/vtu/data/purchase', [DataController::class, 'purchase'])->name('vtu.data.purchase');
+    
+    Route::get('/vtu/airtime', [\App\Http\Controllers\Web\AirtimeController::class, 'index'])->name('vtu.airtime.index');
+    Route::post('/vtu/airtime/purchase', [\App\Http\Controllers\Web\AirtimeController::class, 'purchase'])->name('vtu.airtime.purchase');
 
     // Wallet Routes
     Route::get('/wallet', [WalletController::class, 'index'])->name('wallet.index');

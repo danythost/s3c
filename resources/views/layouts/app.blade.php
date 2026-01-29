@@ -54,7 +54,7 @@
                                             $appLinks = [
                                                 ['name' => 'Dashboard', 'route' => 'dashboard', 'icon' => '🏠'],
                                                 ['name' => 'Data Bundle', 'route' => 'vtu.data.index', 'icon' => '📶'],
-                                                ['name' => 'Airtime', 'route' => 'vtu.data.index', 'icon' => '📞'],
+                                                ['name' => 'Airtime', 'route' => 'vtu.airtime.index', 'icon' => '📞'],
                                                 ['name' => 'My Wallet', 'route' => 'wallet.index', 'icon' => '💳'],
                                             ];
 

@@ -50,7 +50,7 @@
                 @php
                     $services = [
                         ['name' => 'Data Bundle', 'icon' => '📶', 'desc' => 'MTN, GLO, Airtel...', 'route' => 'vtu.data.index', 'color' => 'blue'],
-                        ['name' => 'Airtime', 'icon' => '📞', 'desc' => 'Instant Top-up', 'route' => 'vtu.data.index', 'color' => 'emerald'],
+                        ['name' => 'Airtime', 'icon' => '📞', 'desc' => 'Instant Top-up', 'route' => 'vtu.airtime.index', 'color' => 'emerald'],
                         ['name' => 'Electricity', 'icon' => '⚡', 'desc' => 'Pay Utility Bills', 'route' => '#', 'color' => 'yellow'],
                         ['name' => 'Cable TV', 'icon' => '📺', 'desc' => 'DSTV, GOTV...', 'route' => '#', 'color' => 'purple'],
                         ['name' => 'Education', 'icon' => '🎓', 'desc' => 'WAEC/JAMB Pins', 'route' => '#', 'color' => 'red'],
@@ -79,7 +79,7 @@
                     <div class="flex items-center justify-between p-4 glass rounded-[1.5rem] border-white/5 hover:bg-white/5 transition-colors">
                         <div class="flex items-center gap-4">
                             <div class="w-10 h-10 rounded-xl bg-white/5 flex items-center justify-center text-lg">
-                                {{ $order->type === 'vtu-data' ? '📶' : '💳' }}
+                                {{ $order->type === 'vtu-data' ? '📶' : ($order->type === 'vtu-airtime' ? '📞' : '💳') }}
                             </div>
                             <div>
                                 <p class="text-xs font-bold text-white">{{ ucfirst(str_replace('-', ' ', $order->type)) }}</p>
