@@ -3,7 +3,87 @@
 @section('title', 'Dashboard')
 
 @section('content')
+@if(isset($stats['provider_balance']) && $stats['provider_balance'] < 5000)
+<div class="mb-6 p-4 rounded-xl bg-red-500/10 border border-red-500/20 text-red-400 flex items-center justify-between">
+    <div class="flex items-center gap-3">
+        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
+        <div>
+            <h4 class="font-bold">Low Wallet Balance Alert</h4>
+            <p class="text-xs opacity-80">Provider wallet is running low (₦{{ number_format($stats['provider_balance'], 2) }}). Please top up immediately.</p>
+        </div>
+    </div>
+    <a href="#" class="px-4 py-2 bg-red-500 text-white text-xs font-bold rounded-lg hover:bg-red-600 transition-colors">Top Up</a>
+</div>
+@endif
+
 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-10">
+    <!-- User Wallets -->
+    <div class="glass p-6 rounded-2xl">
+        <div class="flex items-center gap-4">
+            <div class="w-12 h-12 rounded-xl bg-violet-500/10 flex items-center justify-center text-violet-400">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"/></svg>
+            </div>
+            <div>
+                <p class="text-sm text-gray-400">User Wallets</p>
+                <h3 class="text-2xl font-bold text-white">₦{{ number_format($stats['total_wallets_balance'], 2) }}</h3>
+            </div>
+        </div>
+    </div>
+
+    <!-- Today's Transactions -->
+    <div class="glass p-6 rounded-2xl">
+        <div class="flex items-center gap-4">
+            <div class="w-12 h-12 rounded-xl bg-pink-500/10 flex items-center justify-center text-pink-400">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+            </div>
+            <div>
+                <p class="text-sm text-gray-400">Today's Txns</p>
+                <h3 class="text-2xl font-bold text-white">{{ $stats['today_transactions'] }}</h3>
+                <p class="text-xs text-emerald-400">+₦{{ number_format($stats['today_revenue']) }}</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Provider Status -->
+    <div class="glass p-6 rounded-2xl">
+        <div class="flex items-center gap-4">
+            <div class="w-12 h-12 rounded-xl {{ isset($stats['provider_balance']) ? 'bg-emerald-500/10 text-emerald-400' : 'bg-red-500/10 text-red-400' }} flex items-center justify-center">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M5 12h14M5 12a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v4a2 2 0 01-2 2M5 12a2 2 0 01-2 2v4a2 2 0 012 2h14a2 2 0 012-2v-4a2 2 0 01-2-2m-2-4h.01M17 16h.01"/></svg>
+            </div>
+            <div>
+                <p class="text-sm text-gray-400">Provider Status</p>
+                @if(isset($stats['provider_balance']))
+                    <h3 class="text-lg font-bold text-white">₦{{ number_format($stats['provider_balance'], 2) }}</h3>
+                    <p class="text-[10px] text-emerald-400 uppercase font-bold tracking-wider">Connected</p>
+                @else
+                    <h3 class="text-lg font-bold text-white">Error</h3>
+                    <p class="text-[10px] text-red-400 uppercase font-bold tracking-wider">Disconnected</p>
+                @endif
+            </div>
+        </div>
+    </div>
+
+    <!-- Success vs Failed -->
+    <div class="glass p-6 rounded-2xl">
+        <div class="flex items-center gap-4">
+            <div class="flex-1">
+                <div class="flex justify-between text-xs mb-1">
+                    <span class="text-emerald-400">Success</span>
+                    <span class="text-white">{{ $stats['successful_orders'] }}</span>
+                </div>
+                <div class="h-1.5 bg-white/5 rounded-full overflow-hidden mb-3">
+                    <div class="h-full bg-emerald-400" style="width: {{ $stats['total_orders'] > 0 ? ($stats['successful_orders'] / $stats['total_orders']) * 100 : 0 }}%"></div>
+                </div>
+                <div class="flex justify-between text-xs mb-1">
+                    <span class="text-red-400">Failed</span>
+                    <span class="text-white">{{ $stats['failed_orders'] }}</span>
+                </div>
+                <div class="h-1.5 bg-white/5 rounded-full overflow-hidden">
+                    <div class="h-full bg-red-400" style="width: {{ $stats['total_orders'] > 0 ? ($stats['failed_orders'] / $stats['total_orders']) * 100 : 0 }}%"></div>
+                </div>
+            </div>
+        </div>
+    </div>
     <!-- Stat Cards -->
     <div class="glass p-6 rounded-2xl">
         <div class="flex items-center gap-4">
@@ -108,16 +188,7 @@
                 <p class="text-xs text-gray-400">Configure plans and prices.</p>
             </a>
             
-            <form action="{{ route('admin.vtu.sync-epins') }}" method="POST" class="contents">
-                @csrf
-                <button type="submit" class="glass p-6 rounded-2xl hover:bg-white/5 transition-all group text-left w-full">
-                    <div class="w-10 h-10 rounded-lg bg-emerald-500/10 flex items-center justify-center text-emerald-400 mb-4 group-hover:rotate-180 transition-transform duration-700">
-                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
-                    </div>
-                    <h4 class="font-bold mb-1">Sync EPINS</h4>
-                    <p class="text-xs text-gray-400">Fetch latest data plans.</p>
-                </button>
-            </form>
+
         </div>
     </div>
 </div>

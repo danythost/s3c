@@ -15,6 +15,15 @@ class Order extends Model
         'amount',
         'type',
         'status',
+        'provider',
+        'details',
+        'api_response',
+    ];
+
+    protected $casts = [
+        'amount' => 'decimal:2',
+        'details' => 'array',
+        'api_response' => 'array',
     ];
 
     public function user()

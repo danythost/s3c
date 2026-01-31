@@ -5,6 +5,7 @@ namespace App\Services\VTU;
 use App\Contracts\VTU\VTUProviderInterface;
 use App\Domains\VTU\VTUResponse;
 use Illuminate\Support\Facades\Http;
+use App\Services\Logger\ApiLogger;
 
 class EpinsVTUService implements VTUProviderInterface
 {
@@ -30,14 +31,18 @@ class EpinsVTUService implements VTUProviderInterface
         $networkCode = $this->mapNetwork($payload['network'] ?? '');
 
         try {
+            $startTime = microtime(true);
             $response = Http::timeout(30)
                 ->withToken($this->bearerToken)
-                ->post($this->baseUrl . 'data', [
+                ->post($this->baseUrl . 'data', $requestBody = [
                     'network'    => $networkCode,
                     'phone'      => $payload['phone'],
                     'plan_code'  => $payload['plan_code'] ?? $payload['plan_id'],
                     'reference'  => $reference,
                 ]);
+            $duration = (int) ((microtime(true) - $startTime) * 1000);
+
+            ApiLogger::log('epins', 'POST', $this->baseUrl . 'data', $requestBody, $response->json(), $response->status(), $duration);
 
             if (!$response->successful()) {
                 return VTUResponse::failure('EPINS API request failed', ['raw' => $response->json() ?? []]);
@@ -65,14 +70,18 @@ class EpinsVTUService implements VTUProviderInterface
         $networkCode = $this->mapNetwork($payload['network'] ?? '');
 
         try {
+            $startTime = microtime(true);
             $response = Http::timeout(30)
                 ->withToken($this->bearerToken)
-                ->post($this->baseUrl . 'airtime', [
+                ->post($this->baseUrl . 'airtime', $requestBody = [
                     'network'    => strtoupper($payload['network']),
                     'phone'      => $payload['phone'],
                     'amount'     => $payload['amount'],
                     'ref'        => $reference,
                 ]);
+            $duration = (int) ((microtime(true) - $startTime) * 1000);
+
+            ApiLogger::log('epins', 'POST', $this->baseUrl . 'airtime', $requestBody, $response->json(), $response->status(), $duration);
 
             if (!$response->successful()) {
                 return VTUResponse::failure('EPINS API request failed', ['raw' => $response->json() ?? []]);
@@ -97,9 +106,13 @@ class EpinsVTUService implements VTUProviderInterface
     public function getBalance(): VTUResponse
     {
         try {
+            $startTime = microtime(true);
             $response = Http::timeout(30)
                 ->withToken($this->bearerToken)
                 ->get($this->baseUrl . 'account');
+            $duration = (int) ((microtime(true) - $startTime) * 1000);
+
+            ApiLogger::log('epins', 'GET', $this->baseUrl . 'account', [], $response->json(), $response->status(), $duration);
 
             if (!$response->successful()) {
                 return VTUResponse::failure('EPINS Balance check failed: HTTP ' . $response->status());
@@ -119,70 +132,7 @@ class EpinsVTUService implements VTUProviderInterface
         }
     }
 
-    /**
-     * Fetch all data plans from EPINS
-     */
-    public function fetchDataPlans(): VTUResponse
-    {
-        try {
-            $response = Http::timeout(30)
-                ->withToken($this->bearerToken)
-                ->get($this->baseUrl . 'data');
 
-            if (!$response->successful()) {
-                return VTUResponse::failure('EPINS API failed to fetch data plans', ['raw' => $response->json() ?? []]);
-            }
-
-            return VTUResponse::success('Data plans retrieved', $response->json());
-
-        } catch (\Throwable $e) {
-            return VTUResponse::failure('Exception during data plans fetch: ' . $e->getMessage());
-        }
-    }
-
-    /**
-     * Sync data plans to local database
-     */
-    public function syncDataPlans(): VTUResponse
-    {
-        $response = $this->fetchDataPlans();
-        if (!$response->success) {
-            return $response;
-        }
-
-        $data = $response->data;
-        
-        // EPINS usually returns plans in 'description' or directly in the response
-        $plans = $data['description'] ?? $data['data'] ?? null;
-
-        if (!is_array($plans)) {
-            return VTUResponse::failure('Invalid data plan format received from EPINS', $data);
-        }
-
-        $count = 0;
-        foreach ($plans as $plan) {
-            if (!isset($plan['plancode'])) continue;
-
-            \App\Models\DataPlan::updateOrCreate(
-                ['provider' => 'epins', 'code' => $plan['plancode']],
-                [
-                    'network'        => $this->reverseMapNetwork($plan['network'] ?? ''),
-                    'name'           => $plan['plan_name'] ?? ($plan['name'] ?? 'Unknown Plan'),
-                    'provider_price' => $plan['amount'] ?? 0,
-                    // We only set selling_price if it's a new record to avoid overriding admin markups
-                    'selling_price'  => \App\Models\DataPlan::where('provider', 'epins')
-                        ->where('code', $plan['plancode'])
-                        ->exists() 
-                        ? \DB::raw('selling_price') 
-                        : ($plan['amount'] ?? 0),
-                    'is_active'      => true,
-                ]
-            );
-            $count++;
-        }
-
-        return VTUResponse::success("Successfully synced $count data plans");
-    }
 
     /**
      * Map network names to EPINS codes
