@@ -36,8 +36,13 @@ return [
     ],
 
     'epins' => [
-        'base_url' => env('EPINS_BASE_URL'),
+        'base_url' => env('EPINS_MODE') === 'live' 
+            ? env('EPINS_LIVE_BASE_URL', 'https://api.epins.com.ng/v3/autho')
+            : env('EPINS_SANDBOX_BASE_URL', 'https://api.epins.com.ng/v1'),
         'api_key'  => env('EPINS_API_KEY'),
+        'keys' => [
+            'data' => env('EPINS_API_KEY'),
+        ],
     ],
 
     'flutterwave' => [

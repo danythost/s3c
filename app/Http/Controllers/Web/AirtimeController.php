@@ -23,7 +23,7 @@ class AirtimeController extends Controller
     {
         $validated = $request->validate([
             'phone'   => ['required', 'string', 'digits:11'],
-            'network' => ['required', 'string', 'in:MTN,GLO,AIRTEL,9MOBILE'],
+            'network' => ['required', 'string', 'in:MTN,Airtel,GLO,9mobile,AIRTEL,9MOBILE'],
             'amount'  => ['required', 'numeric', 'min:100', 'max:50000'],
         ]);
 

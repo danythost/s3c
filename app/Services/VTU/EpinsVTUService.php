@@ -19,7 +19,7 @@ class EpinsVTUService implements VTUProviderInterface
         $this->baseUrl = rtrim(config('vtu.epins.base_url', ''), '/') . '/';
         $this->apiKey = config('vtu.epins.api_key', '');
         $this->username = config('vtu.epins.username', '');
-        $this->bearerToken = config('vtu.epins.bearer_token', '');
+        $this->bearerToken = (string) config('vtu.epins.bearer_token', '');
     }
 
     /**
@@ -28,21 +28,30 @@ class EpinsVTUService implements VTUProviderInterface
     public function purchaseData(array $payload): VTUResponse
     {
         $reference = $payload['reference'] ?? uniqid('data_');
-        $networkCode = $this->mapNetwork($payload['network'] ?? '');
-
+        $networkId = $this->mapNetwork($payload['network'] ?? '');
+        
         try {
             $startTime = microtime(true);
+            
+            $requestBody = [
+                'networkId'    => $networkId,
+                'MobileNumber' => $payload['phone'],
+                'DataPlan'     => (int) ($payload['plan_code'] ?? $payload['plan_id']),
+                'ref'          => $reference,
+            ];
+
             $response = Http::timeout(30)
-                ->withToken($this->apiKey)
-                ->post($this->baseUrl . 'data', $requestBody = [
-                    'network'    => $networkCode,
-                    'phone'      => $payload['phone'],
-                    'plan_code'  => $payload['plan_code'] ?? $payload['plan_id'],
-                    'reference'  => $reference,
-                ]);
+                ->withHeaders([
+                    'Authorization' => 'Bearer ' . $this->apiKey,
+                    'Content-Type'  => 'application/json',
+                    'Accept'        => 'application/json',
+                ])
+                ->withBody(json_encode($requestBody), 'application/json')
+                ->post($this->baseUrl . 'data/');
+
             $duration = (int) ((microtime(true) - $startTime) * 1000);
 
-            ApiLogger::log('epins', 'POST', $this->baseUrl . 'data', $requestBody, $response->json(), $response->status(), $duration);
+            ApiLogger::log('epins', 'POST', $this->baseUrl . 'data/', $requestBody, $response->json(), $response->status(), $duration);
 
             if (!$response->successful()) {
                 return VTUResponse::failure('EPINS API request failed', ['raw' => $response->json() ?? []]);
@@ -50,8 +59,8 @@ class EpinsVTUService implements VTUProviderInterface
 
             $data = $response->json();
 
-            if (($data['status'] ?? false) !== true && ($data['status'] ?? '') !== 'success') {
-                return VTUResponse::failure($data['message'] ?? 'VTU purchase failed', $data);
+            if (($data['status'] ?? false) !== true && strtolower($data['status'] ?? '') !== 'success' && ($data['code'] ?? '') != '101') {
+                return VTUResponse::failure($data['message'] ?? ($data['description'] ?? 'VTU purchase failed'), $data);
             }
 
             return VTUResponse::success('Data purchase successful', $data, $reference);
@@ -66,22 +75,31 @@ class EpinsVTUService implements VTUProviderInterface
      */
     public function purchaseAirtime(array $payload): VTUResponse
     {
-        $reference = $payload['reference'] ?? uniqid('airtime_');
-        $networkCode = $this->mapNetwork($payload['network'] ?? '');
-
+        $reference = $payload['reference'] ?? 'AIR' . time() . rand(100, 999);
+        $networkId = $this->mapNetwork($payload['network'] ?? '');
+        
         try {
             $startTime = microtime(true);
+            
+            $requestBody = [
+                'network' => $this->mapNetworkName($payload['network'] ?? ''),
+                'phone'   => $payload['phone'],
+                'amount'  => (int) $payload['amount'],
+                'ref'     => $reference,
+            ];
+
             $response = Http::timeout(30)
-                ->withToken($this->apiKey)
-                ->post($this->baseUrl . 'airtime', $requestBody = [
-                    'network'    => strtoupper($payload['network']),
-                    'phone'      => $payload['phone'],
-                    'amount'     => $payload['amount'],
-                    'ref'        => $reference,
-                ]);
+                ->withHeaders([
+                    'Authorization' => 'Bearer ' . $this->apiKey,
+                    'Content-Type'  => 'application/json',
+                    'Accept'        => 'application/json',
+                ])
+                ->withBody(json_encode($requestBody), 'application/json')
+                ->post($this->baseUrl . 'airtime/');
+
             $duration = (int) ((microtime(true) - $startTime) * 1000);
 
-            ApiLogger::log('epins', 'POST', $this->baseUrl . 'airtime', $requestBody, $response->json(), $response->status(), $duration);
+            ApiLogger::log('epins', 'POST', $this->baseUrl . 'airtime/', $requestBody, $response->json(), $response->status(), $duration);
 
             if (!$response->successful()) {
                 return VTUResponse::failure('EPINS API request failed', ['raw' => $response->json() ?? []]);
@@ -89,11 +107,18 @@ class EpinsVTUService implements VTUProviderInterface
 
             $data = $response->json();
 
-            if (($data['status'] ?? false) !== true) {
+            // Success is either boolean true or "success" string or code 101
+            if (($data['status'] ?? false) !== true && strtolower($data['status'] ?? '') !== 'success' && ($data['code'] ?? '') != '101') {
                 return VTUResponse::failure($data['description'] ?? ($data['message'] ?? 'Airtime purchase failed'), $data);
             }
 
-            return VTUResponse::success($data['description'] ?? 'Airtime purchase successful', $data, $reference);
+
+            $message = $data['description'] ?? $data['message'] ?? 'Airtime purchase successful';
+            if (is_array($message)) {
+                $message = 'Airtime purchase successful';
+            }
+            
+            return VTUResponse::success($message, $data, $reference);
 
         } catch (\Throwable $e) {
             return VTUResponse::failure('VTU service unreachable: ' . $e->getMessage());
@@ -108,11 +133,15 @@ class EpinsVTUService implements VTUProviderInterface
         try {
             $startTime = microtime(true);
             $response = Http::timeout(30)
-                ->withToken($this->apiKey)
-                ->get($this->baseUrl . 'account');
+                ->withHeaders([
+                    'Authorization' => 'Bearer ' . $this->apiKey,
+                    'Content-Type'  => 'application/json',
+                    'Accept'        => 'application/json',
+                ])
+                ->get($this->baseUrl . 'account/');
             $duration = (int) ((microtime(true) - $startTime) * 1000);
 
-            ApiLogger::log('epins', 'GET', $this->baseUrl . 'account', [], $response->json(), $response->status(), $duration);
+            ApiLogger::log('epins', 'GET', $this->baseUrl . 'account/', [], $response->json(), $response->status(), $duration);
 
             if (!$response->successful()) {
                 return VTUResponse::failure('EPINS Balance check failed: HTTP ' . $response->status());
@@ -121,7 +150,7 @@ class EpinsVTUService implements VTUProviderInterface
             $data = $response->json();
 
             // Based on typical EPINS/Laravel response structures
-            if (isset($data['balance']) || isset($data['wallet_balance'])) {
+            if (isset($data['balance']) || isset($data['wallet_balance']) || ($data['code'] ?? null) == 101) {
                 return VTUResponse::success('Balance retrieved', $data);
             }
 
@@ -134,6 +163,17 @@ class EpinsVTUService implements VTUProviderInterface
 
 
 
+    protected function mapNetworkName(string $network): string
+    {
+        return match (strtoupper($network)) {
+            'MTN'     => 'mtn',
+            'GLO'     => 'glo',
+            '9MOBILE' => 'etisalat',
+            'AIRTEL'  => 'airtel',
+            default    => strtolower($network),
+        };
+    }
+
     /**
      * Map network names to EPINS codes
      */
@@ -141,9 +181,9 @@ class EpinsVTUService implements VTUProviderInterface
     {
         return match (strtoupper($network)) {
             'MTN'     => '01',
-            'AIRTEL'  => '04',
-            '9MOBILE' => '03',
             'GLO'     => '02',
+            '9MOBILE' => '03',
+            'AIRTEL'  => '04',
             default    => $network,
         };
     }

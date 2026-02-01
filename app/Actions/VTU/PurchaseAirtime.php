@@ -25,7 +25,7 @@ class PurchaseAirtime
      */
     public function execute(User $user, array $data): VTUResponse
     {
-        $reference = 'AIR-' . ($data['reference'] ?? 'AIR-' . Str::uuid());
+        $reference = $data['reference'] ?? 'AIR' . time() . rand(100, 999);
         $amount = $data['amount'];
         $userId = $user->id;
 
