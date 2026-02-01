@@ -11,6 +11,8 @@ class DataPlan extends Model
         'network',
         'code',
         'name',
+        'volume',
+        'type',
         'provider_price',
         'selling_price',
         'validity',

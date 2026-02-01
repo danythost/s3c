@@ -40,10 +40,13 @@ class VTUManagementController extends Controller
 
     public function storePlan(Request $request)
     {
+        $request->merge(['network' => strtoupper($request->network)]);
         $validated = $request->validate([
             'network' => 'required|string',
             'provider' => 'required|string',
             'name' => 'required|string',
+            'volume' => 'nullable|string',
+            'type' => 'nullable|string',
             'code' => 'required|string|unique:data_plans,code',
             'provider_price' => 'required|numeric|min:0',
             'selling_price' => 'required|numeric|min:0',
@@ -65,23 +68,30 @@ class VTUManagementController extends Controller
         try {
             $file = $request->file('csv_file');
             $handle = fopen($file->getPathname(), 'r');
-            $header = fgetcsv($handle); // Skip header
+            $header = fgetcsv($handle);
+            if (!$header) throw new \Exception("Empty CSV file.");
+            
+            // Normalize headers to lowercase to be safe
+            $header = array_map('strtolower', array_map('trim', $header));
 
             $count = 0;
             DB::beginTransaction();
-            while (($row = fgetcsv($handle)) !== false) {
-                // Expected format: network, provider, name, code, provider_price, selling_price, validity
-                if (count($row) < 6) continue;
+            while (($rowArray = fgetcsv($handle)) !== false) {
+                if (count($rowArray) < count($header)) continue;
+                
+                $row = array_combine($header, array_slice($rowArray, 0, count($header)));
 
                 DataPlan::updateOrCreate(
-                    ['code' => $row[3]], // Assume code is unique ID
+                    ['code' => $row['code']],
                     [
-                        'network' => $row[0],
-                        'provider' => $row[1],
-                        'name' => $row[2],
-                        'provider_price' => $row[4],
-                        'selling_price' => $row[5],
-                        'validity' => $row[6] ?? '30 days',
+                        'network' => strtoupper($row['network']),
+                        'provider' => $row['provider'] ?? 'epins',
+                        'name' => $row['name'],
+                        'volume' => $row['volume'] ?? null,
+                        'type' => $row['type'] ?? null,
+                        'provider_price' => $row['provider_price'],
+                        'selling_price' => $row['selling_price'],
+                        'validity' => $row['validity'] ?? '30 days',
                         'is_active' => true,
                     ]
                 );

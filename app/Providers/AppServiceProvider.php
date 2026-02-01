@@ -43,6 +43,7 @@ class AppServiceProvider extends ServiceProvider
             LoginHistory::create([
                 'user_id' => $event->user->id,
                 'email' => $event->user->email,
+                'username' => $event->user->username,
                 'role' => $event->user->role ?? 'user',
                 'ip_address' => Request::ip(),
                 'user_agent' => Request::userAgent(),
@@ -53,7 +54,8 @@ class AppServiceProvider extends ServiceProvider
         Event::listen(Failed::class, function ($event) {
             LoginHistory::create([
                 'user_id' => $event->user ? $event->user->id : null,
-                'email' => $event->credentials['email'] ?? ($event->credentials['username'] ?? 'unknown'),
+                'email' => $event->credentials['email'] ?? null,
+                'username' => $event->credentials['username'] ?? 'unknown',
                 'role' => $event->user ? ($event->user->role ?? 'user') : null,
                 'ip_address' => Request::ip(),
                 'user_agent' => Request::userAgent(),
@@ -62,11 +64,11 @@ class AppServiceProvider extends ServiceProvider
         });
 
         // Rate Limiters
-        RateLimiter::for('login', function (Request $request) {
+        RateLimiter::for('login', function (\Illuminate\Http\Request $request) {
             return Limit::perMinute(5)->by($request->ip());
         });
 
-        RateLimiter::for('admin_login', function (Request $request) {
+        RateLimiter::for('admin_login', function (\Illuminate\Http\Request $request) {
             return Limit::perMinute(5)->by($request->ip());
         });
     }

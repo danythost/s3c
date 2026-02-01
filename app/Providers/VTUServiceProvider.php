@@ -15,7 +15,7 @@ class VTUServiceProvider extends ServiceProvider
     public function register(): void
     {
         $this->app->bind(VTUProviderInterface::class, function ($app) {
-            if (config('app.env') === 'production') {
+            if (config('app.env') === 'production' || config('vtu.epins.use_real_service')) {
                 return new EpinsVTUService();
             }
             return new MockVTUService();

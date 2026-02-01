@@ -23,6 +23,13 @@
             </div>
 
             <div>
+                <label for="username" class="block text-[10px] font-black text-gray-500 uppercase tracking-widest mb-3">Username</label>
+                <input type="text" name="username" id="username" value="{{ old('username') }}" required
+                       class="w-full bg-white/5 border border-white/10 rounded-2xl px-6 py-4 text-white font-bold placeholder-gray-600 focus:outline-none focus:ring-2 focus:ring-emerald-500/50 transition-all">
+                @error('username') <p class="mt-2 text-xs text-red-400 font-bold uppercase tracking-tighter">{{ $message }}</p> @enderror
+            </div>
+
+            <div>
                 <label for="email" class="block text-[10px] font-black text-gray-500 uppercase tracking-widest mb-3">Email Address</label>
                 <input type="email" name="email" id="email" value="{{ old('email') }}" required
                        class="w-full bg-white/5 border border-white/10 rounded-2xl px-6 py-4 text-white font-bold placeholder-gray-600 focus:outline-none focus:ring-2 focus:ring-emerald-500/50 transition-all">

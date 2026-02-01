@@ -5,13 +5,8 @@ namespace App\Listeners;
 use App\Models\VirtualAccount;
 use App\Services\Flutterwave\FlutterwaveService;
 use Illuminate\Auth\Events\Registered;
-use Illuminate\Contracts\Queue\ShouldQueue;
-use Illuminate\Queue\InteractsWithQueue;
-use Illuminate\Support\Facades\Log;
-
-class CreateVirtualAccountForUser implements ShouldQueue
+class CreateVirtualAccountForUser
 {
-    use InteractsWithQueue;
 
     public function __construct(protected FlutterwaveService $flwService)
     {

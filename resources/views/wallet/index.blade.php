@@ -19,7 +19,15 @@
                     <span class="text-xs font-bold text-gray-400 uppercase tracking-widest">Digital Wallet</span>
                 </div>
                 
-                <span class="text-sm font-medium text-gray-500 uppercase tracking-widest block mb-2">Available Funds</span>
+                <div class="flex items-center justify-between mb-2">
+                    <span class="text-sm font-medium text-gray-500 uppercase tracking-widest block">Available Funds</span>
+                    <form action="{{ route('wallet.refresh') }}" method="POST">
+                        @csrf
+                        <button type="submit" class="text-[9px] bg-emerald-500/20 text-emerald-400 px-3 py-1 rounded-full uppercase font-black tracking-widest border border-emerald-500/20 hover:bg-emerald-500 hover:text-white transition-all">
+                            Refresh Balance
+                        </button>
+                    </form>
+                </div>
                 <div class="flex items-baseline gap-2">
                     <span class="text-5xl font-black text-white tracking-tighter">₦ {{ number_format($wallet->balance ?? 0, 2) }}</span>
                     <span class="text-emerald-400 font-bold text-sm bg-emerald-400/10 px-3 py-1 rounded-full border border-emerald-400/20">Active</span>
@@ -28,9 +36,6 @@
                 <div class="mt-12 flex gap-4">
                     <button class="bg-emerald-500 hover:bg-emerald-600 text-white px-8 py-3 rounded-2xl font-bold text-xs shadow-xl shadow-emerald-500/20 transition-all transform hover:scale-105">
                         Transfer Funds
-                    </button>
-                    <button class="glass border-white/10 hover:bg-white/5 text-white px-8 py-3 rounded-2xl font-bold text-xs transition-all">
-                        Withdraw
                     </button>
                 </div>
             </div>
@@ -43,7 +48,9 @@
             <div class="relative h-full flex flex-col">
                 <div class="flex items-center justify-between mb-8">
                     <h3 class="text-lg font-bold text-white tracking-tight">Instant Funding</h3>
-                    <span class="text-[9px] bg-blue-500/20 text-blue-400 px-3 py-1 rounded-full uppercase font-black tracking-widest border border-blue-500/20">Bank Transfer</span>
+                    <div class="flex items-center gap-3">
+                        <span class="text-[9px] bg-blue-500/20 text-blue-400 px-3 py-1 rounded-full uppercase font-black tracking-widest border border-blue-500/20">Bank Transfer</span>
+                    </div>
                 </div>
 
                 @if(isset($virtualAccount))

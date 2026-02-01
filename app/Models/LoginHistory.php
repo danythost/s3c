@@ -8,6 +8,7 @@ class LoginHistory extends Model
 {
     protected $fillable = [
         'user_id',
+        'username',
         'email',
         'role',
         'ip_address',

@@ -51,9 +51,6 @@
                     $services = [
                         ['name' => 'Data Bundle', 'icon' => '📶', 'desc' => 'MTN, GLO, Airtel...', 'route' => 'vtu.data.index', 'color' => 'blue'],
                         ['name' => 'Airtime', 'icon' => '📞', 'desc' => 'Instant Top-up', 'route' => 'vtu.airtime.index', 'color' => 'emerald'],
-                        ['name' => 'Electricity', 'icon' => '⚡', 'desc' => 'Pay Utility Bills', 'route' => '#', 'color' => 'yellow'],
-                        ['name' => 'Cable TV', 'icon' => '📺', 'desc' => 'DSTV, GOTV...', 'route' => '#', 'color' => 'purple'],
-                        ['name' => 'Education', 'icon' => '🎓', 'desc' => 'WAEC/JAMB Pins', 'route' => '#', 'color' => 'red'],
                         ['name' => 'Settings', 'icon' => '⚙️', 'desc' => 'Manage Profile', 'route' => '#', 'color' => 'gray'],
                     ];
                 @endphp

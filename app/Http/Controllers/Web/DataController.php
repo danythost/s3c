@@ -16,7 +16,7 @@ class DataController extends Controller
         $plans = \App\Models\DataPlan::where('is_active', true)
             ->where('provider', 'epins')
             ->get()
-            ->groupBy('network');
+            ->groupBy(fn($plan) => strtoupper($plan->network));
 
         return view('vtu.data.index', compact('plans'));
     }

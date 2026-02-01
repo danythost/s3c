@@ -47,10 +47,17 @@
 
                     <div class="grid grid-cols-2 sm:grid-cols-4 gap-4" id="networkSelection">
                         @foreach(['MTN', 'Airtel', 'GLO', '9mobile'] as $networkName)
-                            <label class="cursor-pointer group">
+                            <label class="cursor-pointer group relative">
                                 <input type="radio" name="network" value="{{ $networkName }}" class="peer hidden" required 
-                                       {{ old('network') == $networkName ? 'checked' : '' }}>
-                                <div class="glass h-24 rounded-2xl border border-white/5 flex flex-col items-center justify-center gap-2 peer-checked:bg-blue-600 peer-checked:border-blue-400 transition-all hover:bg-white/5">
+                                        {{ old('network') == $networkName ? 'checked' : '' }}>
+                                <div class="glass h-24 rounded-2xl border border-white/5 flex flex-col items-center justify-center gap-2 peer-checked:bg-blue-600/20 peer-checked:border-blue-500 peer-checked:ring-2 peer-checked:ring-blue-500/50 transition-all hover:bg-white/5">
+                                    <!-- Selection Indicator -->
+                                    <div class="absolute top-2 right-2 opacity-0 peer-checked:opacity-100 transition-opacity">
+                                        <div class="bg-blue-500 rounded-full p-0.5">
+                                            <svg class="w-3 h-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"/></svg>
+                                        </div>
+                                    </div>
+
                                     <div class="text-xl group-hover:scale-110 transition-transform">
                                         @if($networkName == 'MTN') 🟡 @elseif($networkName == 'Airtel') 🔴 @elseif($networkName == 'GLO') 🟢 @else 🔵 @endif
                                     </div>

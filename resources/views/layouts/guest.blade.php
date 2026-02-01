@@ -24,6 +24,10 @@
             -webkit-backdrop-filter: blur(10px);
             border: 1px solid rgba(255, 255, 255, 0.1);
         }
+        select option {
+            background-color: #1a1a2e;
+            color: #e2e8f0;
+        }
     </style>
 </head>
 <body class="h-full flex items-center justify-center p-6">

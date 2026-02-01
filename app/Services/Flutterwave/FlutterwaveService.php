@@ -34,8 +34,8 @@ class FlutterwaveService
 
             if (!$response->successful()) {
                 $errorBody = $response->body();
-                Log::error('Flutterwave VA Creation Failed: ' . $errorBody);
-                return ['success' => false, 'message' => 'Flutterwave error: ' . $errorBody];
+                Log::error('Flutterwave VA Creation Failed: ' . $errorBody . ' | Payload: ' . json_encode($userData));
+                return ['success' => false, 'message' => 'Flutterwave error: ' . ($response->json()['message'] ?? $errorBody)];
             }
 
             $data = $response->json();
@@ -44,12 +44,15 @@ class FlutterwaveService
                 return ['success' => false, 'message' => $data['message'] ?? 'Unknown error'];
             }
 
+            // Handle variations in key naming (e.g. from user provided JSON vs current docs)
+            $accountData = $data['data'] ?? [];
+            
             return [
                 'success'           => true,
-                'account_number'    => $data['data']['account_number'],
-                'bank_name'         => $data['data']['bank_name'],
-                'account_reference' => $data['data']['flw_ref'],
-                'order_ref'         => $data['data']['order_ref'],
+                'account_number'    => $accountData['account_number'] ?? null,
+                'bank_name'         => $accountData['bank_name'] ?? ($accountData['account_bank_name'] ?? 'Unknown Bank'),
+                'account_reference' => $accountData['flw_ref'] ?? ($accountData['reference'] ?? null),
+                'order_ref'         => $accountData['order_ref'] ?? null,
             ];
 
         } catch (\Throwable $e) {
@@ -65,6 +68,24 @@ class FlutterwaveService
     {
         $response = Http::withToken($this->secretKey)
             ->get($this->baseUrl . "/transactions/{$transactionId}/verify");
+
+        return $response->json();
+    }
+
+    /**
+     * Get recent transactions for a virtual account
+     */
+    public function getTransactions(string $email, ?string $from = null, ?string $to = null)
+    {
+        $params = [
+            'customer_email' => $email,
+        ];
+        
+        if ($from) $params['from'] = $from;
+        if ($to) $params['to'] = $to;
+
+        $response = Http::withToken($this->secretKey)
+            ->get($this->baseUrl . "/transactions", $params);
 
         return $response->json();
     }

@@ -17,9 +17,11 @@ return new class extends Migration
             $table->string('network');               // MTN, AIRTEL, GLO, 9MOBILE
             $table->string('code');                  // provider plan code
             $table->string('name');                  // e.g MTN 1GB SME
+            $table->string('volume')->nullable();
+            $table->string('type')->nullable();
             $table->decimal('provider_price', 10, 2);
             $table->decimal('selling_price', 10, 2);
-            $table->integer('validity')->nullable(); // days
+            $table->string('validity')->nullable(); // e.g., '30 days'
             $table->boolean('is_active')->default(true);
             $table->timestamps();
 

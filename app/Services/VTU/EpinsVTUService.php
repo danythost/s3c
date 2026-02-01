@@ -33,7 +33,7 @@ class EpinsVTUService implements VTUProviderInterface
         try {
             $startTime = microtime(true);
             $response = Http::timeout(30)
-                ->withToken($this->bearerToken)
+                ->withToken($this->apiKey)
                 ->post($this->baseUrl . 'data', $requestBody = [
                     'network'    => $networkCode,
                     'phone'      => $payload['phone'],
@@ -72,7 +72,7 @@ class EpinsVTUService implements VTUProviderInterface
         try {
             $startTime = microtime(true);
             $response = Http::timeout(30)
-                ->withToken($this->bearerToken)
+                ->withToken($this->apiKey)
                 ->post($this->baseUrl . 'airtime', $requestBody = [
                     'network'    => strtoupper($payload['network']),
                     'phone'      => $payload['phone'],
@@ -108,7 +108,7 @@ class EpinsVTUService implements VTUProviderInterface
         try {
             $startTime = microtime(true);
             $response = Http::timeout(30)
-                ->withToken($this->bearerToken)
+                ->withToken($this->apiKey)
                 ->get($this->baseUrl . 'account');
             $duration = (int) ((microtime(true) - $startTime) * 1000);
 

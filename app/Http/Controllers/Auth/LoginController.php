@@ -16,10 +16,10 @@ class LoginController extends Controller
     public function login(Request $request)
     {
         $credentials = $request->validate([
-            'email'    => 'required|email',
+            'username' => 'required|string',
             'password' => 'required',
         ]);
-
+  
         if (Auth::attempt($credentials)) {
             $request->session()->regenerate();
             
@@ -30,9 +30,9 @@ class LoginController extends Controller
             
             return redirect()->route('dashboard');
         }
-
+  
         return back()->withErrors([
-            'email' => 'Invalid credentials',
+            'username' => 'Invalid credentials',
         ]);
     }
 

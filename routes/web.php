@@ -35,6 +35,7 @@ Route::middleware(['auth'])->group(function () {
 
     // Wallet Routes
     Route::get('/wallet', [WalletController::class, 'index'])->name('wallet.index');
+    Route::post('/wallet/refresh', [WalletController::class, 'refresh'])->name('wallet.refresh');
 
     // Auth
     Route::post('/logout', [LoginController::class, 'logout'])->name('logout');
