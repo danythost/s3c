@@ -27,7 +27,7 @@ class EpinsVTUService implements VTUProviderInterface
      */
     public function purchaseData(array $payload): VTUResponse
     {
-        $reference = $payload['reference'] ?? uniqid('data_');
+        $reference = $payload['reference'] ?? 'D' . dechex(time()) . bin2hex(random_bytes(4));
         $networkId = $this->mapNetwork($payload['network'] ?? '');
         
         try {
@@ -40,33 +40,46 @@ class EpinsVTUService implements VTUProviderInterface
                 'ref'          => $reference,
             ];
 
-            $response = Http::timeout(30)
+            $response = Http::timeout(40)
+                ->connectTimeout(15)
                 ->withHeaders([
                     'Authorization' => 'Bearer ' . $this->apiKey,
                     'Content-Type'  => 'application/json',
                     'Accept'        => 'application/json',
                 ])
-                ->withBody(json_encode($requestBody), 'application/json')
-                ->post($this->baseUrl . 'data/');
+                ->withOptions([
+                    'curl' => [
+                        CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
+                    ],
+                ])
+                ->post(rtrim($this->baseUrl, '/') . '/data/', $requestBody);
 
             $duration = (int) ((microtime(true) - $startTime) * 1000);
+            $responseData = $response->json() ?? [];
 
-            ApiLogger::log('epins', 'POST', $this->baseUrl . 'data/', $requestBody, $response->json(), $response->status(), $duration);
+            // Log BEFORE returning
+            try {
+                ApiLogger::log('epins', 'POST', rtrim($this->baseUrl, '/') . '/data/', $requestBody, $responseData, $response->status(), $duration);
+            } catch (\Throwable $logError) {
+                // Ignore logging errors to not break the transaction
+            }
 
             if (!$response->successful()) {
-                return VTUResponse::failure('EPINS API request failed', ['raw' => $response->json() ?? []]);
+                return VTUResponse::failure('EPINS API returned error ' . $response->status(), [
+                    'raw' => $responseData ?? [],
+                    'reference' => $reference
+                ]);
             }
 
-            $data = $response->json();
-
-            if (($data['status'] ?? false) !== true && strtolower($data['status'] ?? '') !== 'success' && ($data['code'] ?? '') != '101') {
-                return VTUResponse::failure($data['message'] ?? ($data['description'] ?? 'VTU purchase failed'), $data);
+            // Success is either boolean true or "success" string or code 101
+            if (($responseData['status'] ?? false) !== true && strtolower($responseData['status'] ?? '') !== 'success' && ($responseData['code'] ?? '') != '101') {
+                return VTUResponse::failure($responseData['message'] ?? ($responseData['description'] ?? 'Data purchase failed'), $responseData);
             }
 
-            return VTUResponse::success('Data purchase successful', $data, $reference);
+            return VTUResponse::success('Data purchase successful', $responseData, $reference);
 
         } catch (\Throwable $e) {
-            return VTUResponse::failure('VTU service unreachable: ' . $e->getMessage());
+            return VTUResponse::failure('VTU service exception: ' . $e->getMessage(), ['trace' => $e->getTraceAsString()]);
         }
     }
 
@@ -75,7 +88,7 @@ class EpinsVTUService implements VTUProviderInterface
      */
     public function purchaseAirtime(array $payload): VTUResponse
     {
-        $reference = $payload['reference'] ?? 'AIR' . time() . rand(100, 999);
+        $reference = $payload['reference'] ?? 'A' . dechex(time()) . bin2hex(random_bytes(4));
         $networkId = $this->mapNetwork($payload['network'] ?? '');
         
         try {

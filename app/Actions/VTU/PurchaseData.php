@@ -26,7 +26,8 @@ class PurchaseData
      */
     public function execute(User $user, array $data): VTUResponse
     {
-        $reference = 'DATA-' . ($data['reference'] ?? 'DATA-' . Str::uuid());
+        // Generate a highly unique 17-character reference: D (1) + hex-time (8) + hex-rand (8)
+        $reference = $data['reference'] ?? 'D' . dechex(time()) . bin2hex(random_bytes(4));
         $amount = $data['amount'];
         $userId = $user->id;
 
