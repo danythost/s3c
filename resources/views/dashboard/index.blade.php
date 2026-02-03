@@ -27,8 +27,8 @@
         <div class="glass p-8 rounded-[2rem] border-white/5 flex flex-col justify-center">
             <span class="text-xs font-bold text-gray-500 uppercase tracking-widest mb-4 block">Usage Stats</span>
             <div class="flex items-end gap-3">
-                <span class="text-4xl font-black text-white">{{ auth()->user()->orders()->count() }}</span>
-                <span class="text-sm text-gray-500 mb-1 font-bold italic">Total Orders</span>
+                <span class="text-4xl font-black text-white">{{ auth()->user()->orders()->count() + auth()->user()->a2cRequests()->count() }}</span>
+                <span class="text-sm text-gray-500 mb-1 font-bold italic">Total Activity</span>
             </div>
             <div class="mt-6 h-1 w-full bg-white/5 rounded-full overflow-hidden">
                 <div class="h-full bg-emerald-500 w-2/3 rounded-full"></div>
@@ -72,20 +72,32 @@
         <div class="space-y-6">
             <h3 class="text-xl font-bold text-white tracking-tight">Recent Activity</h3>
             <div class="space-y-3">
-                @forelse(auth()->user()->orders()->latest()->take(6)->get() as $order)
+                @forelse($activities as $activity)
                     <div class="flex items-center justify-between p-4 glass rounded-[1.5rem] border-white/5 hover:bg-white/5 transition-colors">
                         <div class="flex items-center gap-4">
                             <div class="w-10 h-10 rounded-xl bg-white/5 flex items-center justify-center text-lg">
-                                {{ $order->type === 'vtu-data' ? '📶' : ($order->type === 'vtu-airtime' ? '📞' : '💳') }}
+                                @if($activity->activity_type === 'order')
+                                    {{ $activity->type === 'vtu-data' ? '📶' : ($activity->type === 'vtu-airtime' ? '📞' : '💳') }}
+                                @else
+                                    💰
+                                @endif
                             </div>
                             <div>
-                                <p class="text-xs font-bold text-white">{{ ucfirst(str_replace('-', ' ', $order->type)) }}</p>
-                                <p class="text-[10px] text-gray-500">{{ $order->created_at->diffForHumans() }}</p>
+                                <p class="text-xs font-bold text-white">
+                                    @if($activity->activity_type === 'order')
+                                        {{ ucfirst(str_replace('-', ' ', $activity->type)) }}
+                                    @else
+                                        Airtime to Cash
+                                    @endif
+                                </p>
+                                <p class="text-[10px] text-gray-500">{{ $activity->created_at->diffForHumans() }}</p>
                             </div>
                         </div>
                         <div class="text-right">
-                            <p class="text-sm font-black text-white">₦{{ number_format($order->amount, 2) }}</p>
-                            <span class="text-[9px] uppercase font-black {{ $order->status == 'success' ? 'text-emerald-400' : 'text-red-400' }}">{{ $order->status }}</span>
+                            <p class="text-sm font-black text-white">₦{{ number_format($activity->amount, 2) }}</p>
+                            <span class="text-[9px] uppercase font-black {{ $activity->status == 'completed' || $activity->status == 'success' ? 'text-emerald-400' : ($activity->status == 'pending' ? 'text-yellow-500' : 'text-red-400') }}">
+                                {{ $activity->status }}
+                            </span>
                         </div>
                     </div>
                 @empty

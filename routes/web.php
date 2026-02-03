@@ -37,6 +37,16 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/wallet', [WalletController::class, 'index'])->name('wallet.index');
     Route::post('/wallet/refresh', [WalletController::class, 'refresh'])->name('wallet.refresh');
 
+    // Airtime to Cash (A2C)
+    Route::prefix('airtime-to-cash')->group(function () {
+        Route::get('/', [\App\Http\Controllers\Web\A2CController::class, 'index'])->name('a2c.index');
+        Route::get('/create', [\App\Http\Controllers\Web\A2CController::class, 'create'])->name('a2c.create');
+        Route::post('/store', [\App\Http\Controllers\Web\A2CController::class, 'store'])->name('a2c.store');
+        Route::get('/{id}/instructions', [\App\Http\Controllers\Web\A2CController::class, 'instructions'])->name('a2c.instructions');
+        Route::post('/{id}/confirm', [\App\Http\Controllers\Web\A2CController::class, 'confirm'])->name('a2c.confirm');
+        Route::get('/{id}/status', [\App\Http\Controllers\Web\A2CController::class, 'status'])->name('a2c.status');
+    });
+
     // Auth
     Route::post('/logout', [LoginController::class, 'logout'])->name('logout');
 });
@@ -108,3 +118,5 @@ Route::prefix('admin')->name('admin.')->group(function () {
 
 // Webhooks (Exclude from CSRF in bootstrap/app.php)
 Route::post('/webhooks/flutterwave', [\App\Http\Controllers\Webhooks\FlutterwaveWebhookController::class, 'handle']);
+
+Route::post('/webhooks/vtuafrica', \App\Http\Controllers\Webhooks\VtuAfricaWebhookController::class)->name('webhooks.vtuafrica');

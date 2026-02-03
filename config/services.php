@@ -52,5 +52,10 @@ return [
         'secret_hash'    => env('FLW_SECRET_HASH'),
         'test_bvn'       => env('FLW_TEST_BVN'),
     ],
+    'vtuafrica' => [
+        'key'         => env('VTUAFRICA_API_KEY'),
+        'base_url'    => env('VTUAFRICA_BASE_URL', 'https://vtuafrica.com.ng/portal'),
+        'sandbox_url' => env('VTUAFRICA_SANDBOX_URL', 'https://vtuafrica.com.ng/portal'),
+    ],
 
 ];
