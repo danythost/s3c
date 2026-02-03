@@ -79,30 +79,36 @@
                     <thead>
                         <tr class="text-[10px] uppercase text-gray-500 border-b border-white/10">
                             <th class="pb-3 pl-2">Reference</th>
-                            <th class="pb-3">Service</th>
+                            <th class="pb-3">Source</th>
+                            <th class="pb-3">Type</th>
                             <th class="pb-3">Amount</th>
                             <th class="pb-3">Status</th>
                             <th class="pb-3">Date</th>
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-white/5">
-                        @forelse($user->orders as $order)
+                        @forelse($user->transactions as $transaction)
                             <tr class="text-sm group hover:bg-white/5 transition-colors">
                                 <td class="py-3 pl-2 font-mono text-blue-400">
-                                    <a href="{{ route('admin.orders.show', $order) }}">{{ substr($order->reference, 0, 8) }}...</a>
+                                    {{ substr($transaction->reference, 0, 8) }}...
                                 </td>
-                                <td class="py-3 uppercase text-xs">{{ $order->type }}</td>
-                                <td class="py-3 font-bold">₦{{ number_format($order->amount, 2) }}</td>
+                                <td class="py-3 uppercase text-xs">{{ $transaction->source }}</td>
                                 <td class="py-3">
-                                    <span class="text-[10px] uppercase font-bold {{ $order->status === 'success' ? 'text-emerald-400' : ($order->status === 'failed' ? 'text-red-400' : 'text-amber-400') }}">
-                                        {{ $order->status }}
+                                    <span class="px-2 py-0.5 rounded-full text-[10px] uppercase font-bold {{ $transaction->type === 'credit' ? 'bg-emerald-500/10 text-emerald-400' : 'bg-rose-500/10 text-rose-400' }}">
+                                        {{ $transaction->type }}
                                     </span>
                                 </td>
-                                <td class="py-3 text-gray-400 text-xs">{{ $order->created_at->format('M d H:i') }}</td>
+                                <td class="py-3 font-bold">₦{{ number_format($transaction->amount, 2) }}</td>
+                                <td class="py-3">
+                                    <span class="text-[10px] uppercase font-bold {{ $transaction->status === 'success' || $transaction->status === 'completed' ? 'text-emerald-400' : ($transaction->status === 'failed' ? 'text-red-400' : 'text-amber-400') }}">
+                                        {{ $transaction->status }}
+                                    </span>
+                                </td>
+                                <td class="py-3 text-gray-400 text-xs">{{ $transaction->created_at->format('M d H:i') }}</td>
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="5" class="py-8 text-center text-gray-500 text-xs">No recent transactions.</td>
+                                <td colspan="6" class="py-8 text-center text-gray-500 text-xs">No recent transactions.</td>
                             </tr>
                         @endforelse
                     </tbody>

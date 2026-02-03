@@ -42,7 +42,7 @@ class UserController extends Controller
 
     public function show(User $user)
     {
-        $user->load(['wallet', 'orders' => function($q) {
+        $user->load(['wallet', 'transactions' => function($q) {
             $q->latest()->take(10);
         }]);
         
