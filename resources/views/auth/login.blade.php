@@ -36,6 +36,7 @@
                     <input type="checkbox" name="remember" class="w-5 h-5 rounded-lg bg-white/5 border-white/10 text-blue-500 focus:ring-blue-500/50 transition-all">
                     <span class="ml-3 text-xs font-bold text-gray-500 group-hover/check:text-gray-300 transition-colors">Remember device</span>
                 </label>
+                <a href="{{ route('password.request') }}" class="text-[10px] font-black text-blue-400 hover:text-white uppercase tracking-widest transition-colors">Forgot Key?</a>
             </div>
 
             <button type="submit" 
