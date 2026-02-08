@@ -72,7 +72,7 @@
                                 <span class="px-2 py-1 rounded bg-gray-500/10 text-gray-400 text-[10px] font-bold uppercase">User</span>
                             @endif
                         </td>
-                        <td class="p-6 font-mono font-bold text-sm">₦{{ number_format($user->wallet->balance ?? 0, 2) }}</td>
+                        <td class="p-6 font-mono font-bold text-sm">₦{{ number_format($user->wallet?->balance ?? 0, 2) }}</td>
                         <td class="p-6">
                             @if($user->is_active)
                                 <span class="flex items-center gap-1.5 text-emerald-400 text-[10px] font-bold uppercase">

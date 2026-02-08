@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\User;
+use App\Models\Admin;
 use Illuminate\Http\Request;
 
 class UserController extends Controller
@@ -13,7 +14,18 @@ class UserController extends Controller
      */
     public function index(Request $request)
     {
-        $query = User::with('wallet')->latest();
+        $model = User::class;
+        $with = ['wallet'];
+
+        if ($request->status === 'admins') {
+            $model = Admin::class;
+            $with = [];
+        }
+
+        $query = $model::query()->latest();
+        if ($with) {
+            $query->with($with);
+        }
 
         if ($request->filled('search')) {
             $query->where(function($q) use ($request) {
@@ -30,9 +42,6 @@ class UserController extends Controller
                 case 'suspended':
                     $query->where('is_active', false);
                     break;
-                case 'admins':
-                    $query->where('role', 'admin');
-                    break;
             }
         }
 
@@ -40,21 +49,40 @@ class UserController extends Controller
         return view('admin.users.index', compact('users'));
     }
 
-    public function show(User $user)
+    public function show($id)
     {
+        $user = User::find($id);
+        
+        if (!$user) {
+            $user = Admin::find($id);
+        }
+
+        if (!$user) {
+            abort(404);
+        }
+
         $user->load(['wallet', 'transactions' => function($q) {
             $q->latest()->take(10);
         }]);
         
-        // Mock login logs since we only have last_login_at for now. 
-        // If we need detailed logs, we'd query a separate table (e.g., authentication_log).
-        // For now, we'll just show the last login.
-
         return view('admin.users.show', compact('user'));
     }
 
-    public function toggleStatus(User $user)
+    public function toggleStatus($id)
     {
+        $user = User::find($id);
+        
+        if (!$user) {
+            $user = Admin::find($id);
+            if ($user) {
+                return back()->with('error', "Admin status cannot be toggled from here.");
+            }
+        }
+
+        if (!$user) {
+            abort(404);
+        }
+
         $user->update(['is_active' => !$user->is_active]);
         
         $status = $user->is_active ? 'activated' : 'suspended';
