@@ -27,7 +27,7 @@ class PurchaseData
     public function execute(User $user, array $data): VTUResponse
     {
         // Generate a highly unique 17-character reference: D (1) + hex-time (8) + hex-rand (8)
-        $reference = $data['reference'] ?? 'D' . dechex(time()) . bin2hex(random_bytes(4));
+        $reference = $data['reference'] ?? substr(strtoupper(bin2hex(random_bytes(9))), 0, 17);
         $amount = $data['amount'];
         $userId = $user->id;
 
@@ -60,6 +60,7 @@ class PurchaseData
                         'network' => $data['network'],
                         'phone'   => $data['phone'],
                         'plan_id' => $data['plan_id'] ?? null,
+                        'plan_code' => $data['plan_code'] ?? null, // Add this
                     ],
                 ]);
             });

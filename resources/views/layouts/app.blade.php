@@ -9,6 +9,9 @@
     <!-- Alpine.js -->
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
 
+    <!-- SweetAlert2 -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -35,6 +38,21 @@
     </style>
 </head>
 <body class="h-full bg-[#0f172a] text-gray-200">
+    <!-- Global Announcement Banner -->
+    @if(isset($activeAnnouncements) && $activeAnnouncements->count() > 0)
+        @foreach($activeAnnouncements as $announcement)
+            <div class="bg-yellow-400 text-gray-900 py-3 px-6 text-center relative z-[70] border-b border-yellow-500/20 shadow-xl">
+                <div class="max-w-7xl mx-auto flex items-center justify-center gap-3">
+                    <span class="text-xl">📢</span>
+                    <div class="text-sm font-black uppercase tracking-tight">
+                        <span class="mr-2">{{ $announcement->title }}:</span>
+                        <span class="font-bold opacity-80">{{ $announcement->message }}</span>
+                    </div>
+                </div>
+            </div>
+        @endforeach
+    @endif
+
     <div x-data="{ sidebarOpen: false }" class="min-h-full">
         <!-- Sidebar for Mobile -->
         <div x-show="sidebarOpen" class="relative z-50 lg:hidden" role="dialog" aria-modal="true">
@@ -68,7 +86,7 @@
                                                 ['name' => 'Shop', 'route' => 'shop', 'icon' => '<path d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"/>'],
                                                 ['name' => 'About Us', 'url' => '#about', 'icon' => '<path d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>'],
                                                 ['name' => 'Convert to Cash', 'route' => 'a2c.index', 'icon' => '<path d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />'],
-                                                ['name' => 'Developers', 'url' => '#', 'icon' => '<path d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4"/>'],
+                                                ['name' => 'Developers', 'url' => '#team', 'icon' => '<path d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4"/>'],
                                                 ['name' => 'Contact', 'url' => '#contact', 'icon' => '<path d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>'],
                                             ];
 
@@ -108,11 +126,38 @@
                                     </ul>
                                 </li>
 
+                                @if(isset($announcements) && $announcements->count() > 0)
+                                    <li class="mt-4 pt-4 border-t border-white/5">
+                                        <div class="px-2 mb-2">
+                                            <span class="text-[10px] font-black uppercase tracking-widest text-yellow-500">Announcements</span>
+                                        </div>
+                                        <div class="space-y-2">
+                                            @foreach($activeAnnouncements as $announcement)
+                                                @php
+                                                    $sidebarColors = [
+                                                        'info' => 'bg-blue-500/10 text-yellow-400 border-blue-500/20',
+                                                        'warning' => 'bg-amber-500/10 text-yellow-400 border-amber-500/20',
+                                                        'danger' => 'bg-red-500/10 text-yellow-400 border-red-500/20',
+                                                        'success' => 'bg-emerald-500/10 text-yellow-400 border-emerald-500/20',
+                                                    ];
+                                                    $sidebarColorClass = $sidebarColors[$announcement->type] ?? $sidebarColors['info'];
+                                                @endphp
+                                                <div class="p-3 rounded-xl border {{ $sidebarColorClass }} text-[11px] leading-tight">
+                                                    <div class="font-bold mb-1 flex items-center gap-2 text-yellow-400">
+                                                        <span>@if($announcement->type == 'warning') ⚠️ @elseif($announcement->type == 'danger') 🚫 @elseif($announcement->type == 'success') ✅ @else 📢 @endif</span>
+                                                        {{ $announcement->title }}
+                                                    </div>
+                                                </div>
+                                            @endforeach
+                                        </div>
+                                    </li>
+                                @endif
+
                                 @if(!$isMarketing)
                                     <li class="mt-auto pt-4 border-t border-white/5">
                                         <form method="POST" action="{{ route('logout') }}">
                                             @csrf
-                                            <button type="submit" class="-mx-2 flex items-center gap-x-3 rounded-md p-2 text-sm font-semibold leading-6 text-gray-400 hover:bg-red-500/10 hover:text-red-400 w-full text-left transition-all">
+                                            <button type="submit" class="-mx-2 flex items-center gap-x-3 rounded-md p-2 text-sm font-semibold leading-6 text-yellow-500 hover:bg-yellow-500/10 w-full text-left transition-all">
                                                 <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path d="M15.75 9V5.25A2.25 2.25 0 0013.5 3h-6a2.25 2.25 0 00-2.25 2.25v13.5A2.25 2.25 0 007.5 21h6a2.25 2.25 0 002.25-2.25V15M12 9l-3 3m0 0l3 3m-3-3h12.75" /></svg>
                                                 Logout
                                             </button>
@@ -180,11 +225,39 @@
                             </ul>
                         </li>
                         
+                        @if(isset($activeAnnouncements) && $activeAnnouncements->count() > 0)
+                            <li class="mt-4 pt-4 border-t border-white/5">
+                                <div class="px-2 mb-2">
+                                    <span class="text-[10px] font-black uppercase tracking-widest text-yellow-500">Announcements</span>
+                                </div>
+                                <div class="space-y-2">
+                                    @foreach($activeAnnouncements as $announcement)
+                                        @php
+                                            $sidebarColors = [
+                                                'info' => 'bg-blue-500/10 text-yellow-400 border-blue-500/20',
+                                                'warning' => 'bg-amber-500/10 text-yellow-400 border-amber-500/20',
+                                                'danger' => 'bg-red-500/10 text-yellow-400 border-red-500/20',
+                                                'success' => 'bg-emerald-500/10 text-yellow-400 border-emerald-500/20',
+                                            ];
+                                            $sidebarColorClass = $sidebarColors[$announcement->type] ?? $sidebarColors['info'];
+                                        @endphp
+                                        <div class="p-3 rounded-xl border {{ $sidebarColorClass }} text-[11px] leading-tight group/ann">
+                                            <div class="font-bold mb-1 flex items-center gap-2 text-yellow-400">
+                                                <span>@if($announcement->type == 'warning') ⚠️ @elseif($announcement->type == 'danger') 🚫 @elseif($announcement->type == 'success') ✅ @else 📢 @endif</span>
+                                                {{ $announcement->title }}
+                                            </div>
+                                            <p class="opacity-0 group-hover/ann:opacity-100 h-0 group-hover/ann:h-auto transition-all duration-300 overflow-hidden text-[10px] mt-1">{{ $announcement->message }}</p>
+                                        </div>
+                                    @endforeach
+                                </div>
+                            </li>
+                        @endif
+
                         @if(!$isMarketing)
                             <li class="mt-auto pt-6 border-t border-white/5">
                                 <form method="POST" action="{{ route('logout') }}">
                                     @csrf
-                                    <button type="submit" class="-mx-2 flex items-center gap-x-3 rounded-md p-2 text-sm font-semibold leading-6 text-gray-400 hover:bg-red-500/10 hover:text-red-400 w-full text-left transition-all">
+                                    <button type="submit" class="-mx-2 flex items-center gap-x-3 rounded-md p-2 text-sm font-semibold leading-6 text-yellow-500 hover:bg-yellow-500/10 w-full text-left transition-all">
                                         <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path d="M15.75 9V5.25A2.25 2.25 0 0013.5 3h-6a2.25 2.25 0 00-2.25 2.25v13.5A2.25 2.25 0 007.5 21h6a2.25 2.25 0 002.25-2.25V15M12 9l-3 3m0 0l3 3m-3-3h12.75" /></svg>
                                         Logout
                                     </button>
@@ -261,11 +334,11 @@
             </main>
             
             <footer class="py-6 border-t border-white/5 px-4 sm:px-6 lg:px-8">
-                <div class="flex flex-col md:flex-row justify-between items-center gap-4 text-[10px] text-gray-500 uppercase font-bold tracking-widest">
+                <div class="flex flex-col md:flex-row justify-between items-center gap-4 text-[10px] text-white/50 uppercase font-bold tracking-widest">
                     <span>© {{ date('Y') }} {{ config('app.name') }}</span>
                     <div class="flex gap-6">
-                        <a href="#" class="hover:text-blue-400">Support</a>
-                        <a href="#" class="hover:text-blue-400">Terms</a>
+                        <a href="#" class="hover:text-white transition-colors">Support</a>
+                        <a href="#" class="hover:text-white transition-colors">Terms</a>
                     </div>
                 </div>
             </footer>

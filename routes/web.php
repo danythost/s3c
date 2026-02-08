@@ -9,7 +9,11 @@ use App\Http\Controllers\Auth\RegisterController; // User created this one
 
 Route::get('/', function () {
     $products = \App\Models\Product::where('status', 'active')->latest()->take(8)->get();
-    return view('home', compact('products'));
+    
+    // Fetch active pages
+    $pages = \App\Models\Page::where('is_active', true)->whereIn('slug', ['home', 'about', 'developers', 'ceo', 'team'])->get()->keyBy('slug');
+
+    return view('home', compact('products', 'pages'));
 })->name('home');
 
 Route::get('/shop', [\App\Http\Controllers\Web\ShopController::class, 'index'])->name('shop');
@@ -44,14 +48,7 @@ Route::middleware(['auth'])->group(function () {
     Route::post('/wallet/refresh', [WalletController::class, 'refresh'])->name('wallet.refresh');
 
     // Airtime to Cash (A2C)
-    Route::prefix('airtime-to-cash')->group(function () {
-        Route::get('/', [\App\Http\Controllers\Web\A2CController::class, 'index'])->name('a2c.index');
-        Route::get('/create', [\App\Http\Controllers\Web\A2CController::class, 'create'])->name('a2c.create');
-        Route::post('/store', [\App\Http\Controllers\Web\A2CController::class, 'store'])->name('a2c.store');
-        Route::get('/{id}/instructions', [\App\Http\Controllers\Web\A2CController::class, 'instructions'])->name('a2c.instructions');
-        Route::post('/{id}/confirm', [\App\Http\Controllers\Web\A2CController::class, 'confirm'])->name('a2c.confirm');
-        Route::get('/{id}/status', [\App\Http\Controllers\Web\A2CController::class, 'status'])->name('a2c.status');
-    });
+    Route::get('/airtime-to-cash', [\App\Http\Controllers\Web\A2CController::class, 'index'])->name('a2c.index');
 
     // Profile
     Route::get('/profile', [\App\Http\Controllers\Web\ProfileController::class, 'show'])->name('profile');
@@ -109,6 +106,11 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::put('/content/announcements/{announcement}', [\App\Http\Controllers\Admin\ContentController::class, 'updateAnnouncement'])->name('content.announcements.update');
         Route::patch('/content/announcements/{announcement}/toggle', [\App\Http\Controllers\Admin\ContentController::class, 'toggleAnnouncement'])->name('content.announcements.toggle');
         Route::delete('/content/announcements/{announcement}', [\App\Http\Controllers\Admin\ContentController::class, 'deleteAnnouncement'])->name('content.announcements.destroy');
+
+        // Page Management
+        Route::get('/pages', [\App\Http\Controllers\Admin\PageController::class, 'index'])->name('pages.index');
+        Route::get('/pages/{page}/edit', [\App\Http\Controllers\Admin\PageController::class, 'edit'])->name('pages.edit');
+        Route::put('/pages/{page}', [\App\Http\Controllers\Admin\PageController::class, 'update'])->name('pages.update');
 
         // System Configuration
         Route::get('/settings', [\App\Http\Controllers\Admin\SystemConfigController::class, 'index'])->name('settings.index');

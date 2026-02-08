@@ -19,6 +19,20 @@ return Application::configure(basePath: dirname(__DIR__))
             '/webhooks/flutterwave',
             '/webhooks/vtuafrica',
         ]);
+
+        $middleware->redirectGuestsTo(function (\Illuminate\Http\Request $request) {
+            if ($request->is('admin/*')) {
+                return route('admin.login');
+            }
+            return route('login');
+        });
+
+        $middleware->redirectUsersTo(function (\Illuminate\Http\Request $request) {
+            if (\Illuminate\Support\Facades\Auth::guard('admin')->check()) {
+                return route('admin.dashboard');
+            }
+            return route('dashboard'); // or home
+        });
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         //

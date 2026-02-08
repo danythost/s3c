@@ -34,19 +34,16 @@ class EpinsVTUService implements VTUProviderInterface
             $startTime = microtime(true);
             
             $requestBody = [
-                'networkId'    => $networkId,
-                'MobileNumber' => $payload['phone'],
-                'DataPlan'     => (int) ($payload['plan_code'] ?? $payload['plan_id']),
+                'networkId'    => (string) $networkId,
+                'MobileNumber' => (string) $payload['phone'],
+                'DataPlan'     => (string) ($payload['plan_code'] ?? $payload['plan_id']),
                 'ref'          => $reference,
             ];
 
-            $response = Http::timeout(40)
+            $response = Http::withToken($this->apiKey)
+                ->acceptJson()
+                ->timeout(40)
                 ->connectTimeout(15)
-                ->withHeaders([
-                    'Authorization' => 'Bearer ' . $this->apiKey,
-                    'Content-Type'  => 'application/json',
-                    'Accept'        => 'application/json',
-                ])
                 ->withOptions([
                     'curl' => [
                         CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
@@ -95,7 +92,7 @@ class EpinsVTUService implements VTUProviderInterface
             $startTime = microtime(true);
             
             $requestBody = [
-                'network' => $this->mapNetworkName($payload['network'] ?? ''),
+                'network' => $networkId,
                 'phone'   => $payload['phone'],
                 'amount'  => (int) $payload['amount'],
                 'ref'     => $reference,
@@ -108,7 +105,7 @@ class EpinsVTUService implements VTUProviderInterface
                     'Accept'        => 'application/json',
                 ])
                 ->withBody(json_encode($requestBody), 'application/json')
-                ->post($this->baseUrl . 'airtime/');
+                ->post(rtrim($this->baseUrl, '/') . '/airtime/', $requestBody);
 
             $duration = (int) ((microtime(true) - $startTime) * 1000);
 

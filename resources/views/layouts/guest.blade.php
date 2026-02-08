@@ -30,15 +30,34 @@
         }
     </style>
 </head>
-<body class="h-full flex items-center justify-center p-6">
-    <div class="w-full max-w-md">
-        <div class="text-center mb-10">
-            <a href="/" class="text-4xl font-bold bg-gradient-to-r from-blue-400 to-emerald-400 bg-clip-text text-transparent">
-                S3C
-            </a>
+<body class="h-full bg-[#0f172a] relative">
+    <!-- Global Announcement Banner -->
+    @if(isset($activeAnnouncements) && $activeAnnouncements->count() > 0)
+        <div class="fixed top-0 left-0 right-0 z-[100]">
+            @foreach($activeAnnouncements as $announcement)
+                <div class="bg-yellow-400 text-gray-900 py-2 px-6 text-center border-b border-yellow-500/20 shadow-lg">
+                    <div class="max-w-7xl mx-auto flex items-center justify-center gap-2">
+                        <span class="text-lg">📢</span>
+                        <div class="text-[11px] font-black uppercase tracking-tight">
+                            <span class="mr-2">{{ $announcement->title }}:</span>
+                            <span class="font-bold opacity-80">{{ $announcement->message }}</span>
+                        </div>
+                    </div>
+                </div>
+            @endforeach
         </div>
-        
-        @yield('content')
+    @endif
+
+    <div class="min-h-full flex items-center justify-center w-full p-6">
+        <div class="w-full max-w-md mt-16">
+            <div class="text-center mb-10">
+                <a href="/" class="text-4xl font-bold bg-gradient-to-r from-blue-400 to-emerald-400 bg-clip-text text-transparent">
+                    S3C
+                </a>
+            </div>
+            
+            @yield('content')
+        </div>
     </div>
 </body>
 </html>

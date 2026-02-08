@@ -38,6 +38,7 @@ class DataController extends Controller
             'phone'     => $validated['phone'],
             'network'   => $validated['network'],
             'plan_code' => $plan->code,
+            'plan_id'   => $plan->id, // Add this line
             'amount'    => $plan->selling_price,
         ];
 

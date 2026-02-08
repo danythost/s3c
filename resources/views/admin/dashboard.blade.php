@@ -68,15 +68,15 @@
         <div class="flex items-center gap-4">
             <div class="flex-1">
                 <div class="flex justify-between text-xs mb-1">
-                    <span class="text-emerald-400">Success</span>
-                    <span class="text-white">{{ $stats['successful_orders'] }}</span>
+                    <span class="text-emerald-400 font-bold uppercase tracking-wider">Successful Txns</span>
+                    <span class="text-white font-black">{{ $stats['successful_orders'] }}</span>
                 </div>
                 <div class="h-1.5 bg-white/5 rounded-full overflow-hidden mb-3">
                     <div class="h-full bg-emerald-400" style="width: {{ $stats['total_orders'] > 0 ? ($stats['successful_orders'] / $stats['total_orders']) * 100 : 0 }}%"></div>
                 </div>
                 <div class="flex justify-between text-xs mb-1">
-                    <span class="text-red-400">Failed</span>
-                    <span class="text-white">{{ $stats['failed_orders'] }}</span>
+                    <span class="text-red-400 font-bold uppercase tracking-wider">Failed Txns</span>
+                    <span class="text-white font-black">{{ $stats['failed_orders'] }}</span>
                 </div>
                 <div class="h-1.5 bg-white/5 rounded-full overflow-hidden">
                     <div class="h-full bg-red-400" style="width: {{ $stats['total_orders'] > 0 ? ($stats['failed_orders'] / $stats['total_orders']) * 100 : 0 }}%"></div>
@@ -135,40 +135,43 @@
 </div>
 
 <div class="grid grid-cols-1 lg:grid-cols-2 gap-10">
-    <!-- Recent Orders -->
+    <!-- Recent Transactions -->
     <div class="glass rounded-3xl overflow-hidden">
         <div class="p-6 border-b border-white/10 flex items-center justify-between">
-            <h3 class="text-lg font-bold">Recent Orders</h3>
-            <a href="#" class="text-sm text-blue-400 hover:text-blue-300">View All</a>
+            <h3 class="text-lg font-bold">Recent Transactions</h3>
+            <a href="{{ route('admin.finance.transactions') }}" class="text-sm text-blue-400 hover:text-blue-300">View All</a>
         </div>
         <div class="overflow-x-auto">
             <table class="w-full text-left border-collapse">
                 <thead>
                     <tr class="bg-white/5 border-b border-white/10">
                         <th class="p-4 text-xs font-bold text-gray-400 uppercase">User</th>
-                        <th class="p-4 text-xs font-bold text-gray-400 uppercase">Type</th>
+                        <th class="p-4 text-xs font-bold text-gray-400 uppercase">Source / Type</th>
                         <th class="p-4 text-xs font-bold text-gray-400 uppercase">Amount</th>
                         <th class="p-4 text-xs font-bold text-gray-400 uppercase">Status</th>
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-white/5">
-                    @forelse($recent_orders as $order)
+                    @forelse($recent_transactions as $transaction)
                         <tr class="hover:bg-white/5 transition-colors">
                             <td class="p-4">
-                                <p class="text-sm font-bold text-white">{{ $order->user->name }}</p>
-                                <p class="text-xs text-gray-400">{{ $order->user->email }}</p>
+                                <p class="text-sm font-bold text-white">{{ $transaction->user->name }}</p>
+                                <p class="text-xs text-gray-400">{{ $transaction->user->email }}</p>
                             </td>
-                            <td class="p-4 text-sm">{{ ucfirst($order->type) }}</td>
-                            <td class="p-4 text-sm font-bold">₦{{ number_format($order->amount, 2) }}</td>
                             <td class="p-4">
-                                <span class="px-2 py-1 rounded-full text-[10px] font-bold uppercase {{ $order->status == 'success' ? 'bg-emerald-500/20 text-emerald-400' : 'bg-amber-500/20 text-amber-400' }}">
-                                    {{ $order->status }}
+                                <p class="text-sm font-medium text-white">{{ ucfirst($transaction->source) }}</p>
+                                <p class="text-[10px] text-gray-500 uppercase font-black">{{ str_replace('_', ' ', $transaction->type) }}</p>
+                            </td>
+                            <td class="p-4 text-sm font-bold">₦{{ number_format($transaction->amount, 2) }}</td>
+                            <td class="p-4">
+                                <span class="px-2 py-1 rounded-full text-[10px] font-bold uppercase {{ $transaction->status == 'completed' || $transaction->status == 'success' ? 'bg-emerald-500/20 text-emerald-400' : ($transaction->status == 'pending' ? 'bg-amber-500/20 text-amber-400' : 'bg-red-500/20 text-red-400') }}">
+                                    {{ $transaction->status }}
                                 </span>
                             </td>
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="4" class="p-10 text-center text-gray-400">No orders found.</td>
+                            <td colspan="4" class="p-10 text-center text-gray-400">No transactions found.</td>
                         </tr>
                     @endforelse
                 </tbody>

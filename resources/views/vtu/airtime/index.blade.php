@@ -50,18 +50,23 @@
                             <label class="cursor-pointer group relative">
                                 <input type="radio" name="network" value="{{ $networkName }}" class="peer hidden" required 
                                         {{ old('network') == $networkName ? 'checked' : '' }}>
-                                <div class="glass h-24 rounded-2xl border border-white/5 flex flex-col items-center justify-center gap-2 peer-checked:bg-blue-600/20 peer-checked:border-blue-500 peer-checked:ring-2 peer-checked:ring-blue-500/50 transition-all hover:bg-white/5">
+                                <div class="glass h-24 rounded-2xl border border-white/5 flex flex-col items-center justify-center gap-2 peer-checked:bg-[#FBBC05] peer-checked:backdrop-blur-[20px] peer-checked:border-white/30 peer-checked:ring-2 peer-checked:ring-[#FBBC05]/50 transition-all hover:bg-white/5 active:scale-95"
+                                     style="transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);">
                                     <!-- Selection Indicator -->
                                     <div class="absolute top-2 right-2 opacity-0 peer-checked:opacity-100 transition-opacity">
-                                        <div class="bg-blue-500 rounded-full p-0.5">
-                                            <svg class="w-3 h-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"/></svg>
+                                        <div class="bg-gray-900/80 backdrop-blur-sm rounded-full p-0.5 shadow-lg">
+                                            <svg class="w-3.5 h-3.5 text-[#FBBC05]" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="4">
+                                                <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/>
+                                            </svg>
                                         </div>
                                     </div>
 
-                                    <div class="text-xl group-hover:scale-110 transition-transform">
-                                        @if($networkName == 'MTN') 🟡 @elseif($networkName == 'Airtel') 🔴 @elseif($networkName == 'GLO') 🟢 @else 🔵 @endif
+                                    <div class="w-12 h-12 rounded-xl overflow-hidden group-hover:scale-110 transition-transform bg-white/10 flex items-center justify-center">
+                                        <img src="{{ asset('images/networks/' . strtolower($networkName) . '.png') }}" 
+                                             alt="{{ $networkName }}" 
+                                             class="w-full h-full object-cover">
                                     </div>
-                                    <span class="block text-[10px] font-black uppercase tracking-widest text-gray-400 peer-checked:text-white">{{ $networkName }}</span>
+                                    <span class="block text-[10px] font-black uppercase tracking-widest text-gray-400 peer-checked:text-gray-900">{{ $networkName }}</span>
                                 </div>
                             </label>
                         @endforeach
@@ -170,9 +175,57 @@
         const airtimePurchaseForm = document.getElementById('airtimePurchaseForm');
         const submitBtn = document.getElementById('submitBtn');
 
-        airtimePurchaseForm.addEventListener('submit', function() {
-            submitBtn.disabled = true;
-            submitBtn.innerHTML = '<span class="flex items-center justify-center gap-2"><svg class="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg> PROCESSING...</span>';
+        airtimePurchaseForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+
+            const phone = phoneInput.value;
+            const network = document.querySelector('input[name="network"]:checked')?.value;
+            const amount = amountInput.value;
+
+            if (!network || !phone || !amount) {
+                return;
+            }
+
+            Swal.fire({
+                title: 'Confirm Recharge',
+                html: `
+                    <div class="text-left space-y-3">
+                        <div class="flex justify-between border-b border-white/10 pb-2">
+                            <span class="text-gray-400">Network:</span>
+                            <span class="text-white font-bold">${network}</span>
+                        </div>
+                        <div class="flex justify-between border-b border-white/10 pb-2">
+                            <span class="text-gray-400">Recipient:</span>
+                            <span class="text-white font-bold">${phone}</span>
+                        </div>
+                        <div class="flex justify-between pt-2">
+                            <span class="text-gray-400">Total Amount:</span>
+                            <span class="text-emerald-400 font-black">₦${parseFloat(amount).toLocaleString(undefined, {minimumFractionDigits: 2})}</span>
+                        </div>
+                    </div>
+                `,
+                background: '#1a1a2e',
+                color: '#fff',
+                showCancelButton: true,
+                confirmButtonColor: '#3b82f6',
+                cancelButtonColor: '#ff4444',
+                confirmButtonText: 'Yes, Recharge Now',
+                cancelButtonText: 'Cancel',
+                padding: '2rem',
+                customClass: {
+                    container: 'backdrop-blur-sm',
+                    popup: 'rounded-[2rem] border border-white/10 glass shadow-2xl',
+                    title: 'text-2xl font-black tracking-tight mb-4',
+                    confirmButton: 'rounded-xl px-8 py-4 font-black uppercase tracking-widest text-xs',
+                    cancelButton: 'rounded-xl px-8 py-4 font-black uppercase tracking-widest text-xs'
+                }
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    submitBtn.disabled = true;
+                    submitBtn.innerHTML = '<span class="flex items-center justify-center gap-2"><svg class="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg> PROCESSING...</span>';
+                    airtimePurchaseForm.submit();
+                }
+            });
         });
     });
 </script>

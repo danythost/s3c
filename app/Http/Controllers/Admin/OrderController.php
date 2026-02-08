@@ -5,7 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 
-use App\Models\Order;
+use App\Models\WalletTransaction;
 use App\Services\VTU\EpinsVTUService;
 use Illuminate\Support\Facades\Log;
 
@@ -13,7 +13,7 @@ class OrderController extends Controller
 {
     public function index(Request $request)
     {
-        $query = Order::with('user')->latest();
+        $query = WalletTransaction::with('user')->latest();
 
         if ($request->filled('status')) {
             $query->where('status', $request->status);
@@ -22,64 +22,78 @@ class OrderController extends Controller
         if ($request->filled('search')) {
             $query->where('reference', 'like', '%' . $request->search . '%')
                   ->orWhereHas('user', function($q) use ($request) {
-                      $q->where('email', 'like', '%' . $request->search . '%');
+                      $q->where('email', 'like', '%' . $request->search . '%')
+                        ->orWhere('name', 'like', '%' . $request->search . '%');
                   });
         }
 
-        $orders = $query->paginate(20)->withQueryString();
+        $transactions = $query->paginate(20)->withQueryString();
 
-        return view('admin.orders.index', compact('orders'));
+        return view('admin.orders.index', compact('transactions'));
     }
 
-    public function show(Order $order)
+    public function show($id)
     {
-        return view('admin.orders.show', compact('order'));
+        $transaction = WalletTransaction::with('user')->findOrFail($id);
+        return view('admin.orders.show', compact('transaction'));
     }
 
-    public function retry(Order $order)
+    public function retry($id)
     {
-        if ($order->status === 'success') {
+        $transaction = WalletTransaction::findOrFail($id);
+
+        if ($transaction->status === 'success') {
             return back()->with('error', 'Transaction is already successful.');
         }
 
         try {
             // Simplified retry logic - currently supporting EPINS
-            if ($order->type === 'vtu-data' || $order->type === 'vtu-airtime') {
+            if ($transaction->source === 'data' || $transaction->source === 'airtime') {
                 $service = new EpinsVTUService();
-                $details = $order->details ?? [];
-                
-                // Re-construct payload from details if possible, or Order model needs to store original payload better.
-                // Assuming 'details' contains enough info (phone, plan_code/amount, network)
+                $meta = $transaction->meta ?? [];
                 
                 $payload = [
-                    'network' => $details['network'] ?? '',
-                    'phone' => $details['phone'] ?? '',
-                    'reference' => $order->reference . '_retry_' . time(), // Unique ref for retry
+                    'network' => $meta['network'] ?? '',
+                    'phone' => $meta['phone'] ?? '',
+                    // Generate new 17-char ref: R + 8 hex time + 8 hex rand
+                    'reference' => 'R' . dechex(time()) . bin2hex(random_bytes(4)),
                 ];
 
-                if ($order->type === 'vtu-data') {
-                    $payload['plan_code'] = $details['plan_code'] ?? '';
+                if ($transaction->source === 'data') {
+                    $planCode = $meta['plan_code'] ?? null;
+                    if (!$planCode && !empty($meta['plan_id'])) {
+                        $plan = \App\Models\DataPlan::find($meta['plan_id']);
+                        $planCode = $plan ? $plan->code : null;
+                    }
+
+                    if (!$planCode) {
+                        return back()->with('error', 'Cannot retry: Plan info missing in transaction record.');
+                    }
+
+                    $payload['plan_code'] = $planCode;
                     $response = $service->purchaseData($payload);
                 } else {
-                    $payload['amount'] = $order->amount;
+                    $payload['amount'] = $transaction->amount;
                     $response = $service->purchaseAirtime($payload);
                 }
 
                 // Update logs
-                $logs = $order->api_response ?? [];
+                $logs = $transaction->meta['api_response'] ?? [];
                 $logs[] = [
                     'retry_at' => now()->toIso8601String(),
                     'response' => $response->data
                 ];
                 
+                $newMeta = array_merge($transaction->meta, ['api_response' => $logs]);
+
                 if ($response->success) {
-                    $order->update([
+                    $transaction->update([
                         'status' => 'success',
-                        'api_response' => $logs
+                        'meta' => $newMeta
                     ]);
                     return back()->with('success', 'Retry successful.');
                 } else {
-                    $order->update(['api_response' => $logs]);
+                    $transaction->update(['meta' => $newMeta]);
                     return back()->with('error', 'Retry failed: ' . $response->message);
                 }
             }
@@ -87,7 +101,7 @@ class OrderController extends Controller
             return back()->with('error', 'Retry not supported for this transaction type.');
 
         } catch (\Exception $e) {
-            Log::error('Order Retry Error: ' . $e->getMessage());
+            Log::error('Transaction Retry Error: ' . $e->getMessage());
             return back()->with('error', 'Retry exception: ' . $e->getMessage());
         }
     }

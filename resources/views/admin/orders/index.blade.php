@@ -58,52 +58,52 @@
                 </tr>
             </thead>
             <tbody class="divide-y divide-white/5">
-                @forelse($orders as $order)
-                    <tr class="hover:bg-white/5 transition-colors cursor-pointer" onclick="window.location='{{ route('admin.orders.show', $order) }}'">
-                        <td class="p-6">
-                            <span class="font-mono text-xs text-blue-400">{{ $order->reference }}</span>
-                        </td>
-                        <td class="p-6">
-                            <div class="text-sm font-bold text-white">{{ $order->user->name }}</div>
-                            <div class="text-xs text-gray-500">{{ $order->user->email }}</div>
-                        </td>
-                        <td class="p-6">
-                            <span class="px-2 py-1 rounded bg-white/5 text-xs">{{ strtoupper($order->type) }}</span>
-                            @if(isset($order->details['network']))
-                                <span class="text-xs text-gray-400 ml-1">{{ $order->details['network'] }}</span>
-                            @endif
-                        </td>
-                        <td class="p-6 font-mono font-bold text-sm">₦{{ number_format($order->amount, 2) }}</td>
-                        <td class="p-6 text-xs text-gray-400 font-mono">{{ $order->provider ?? '-' }}</td>
-                        <td class="p-6 text-xs text-gray-400">{{ $order->created_at->format('M d, H:i') }}</td>
-                        <td class="p-6">
-                            @php
-                                $statusColors = [
-                                    'success' => 'bg-emerald-500/20 text-emerald-400',
-                                    'failed' => 'bg-red-500/20 text-red-400',
-                                    'pending' => 'bg-amber-500/20 text-amber-400',
-                                    'reversed' => 'bg-purple-500/20 text-purple-400',
-                                ];
-                                $color = $statusColors[$order->status] ?? 'bg-gray-500/20 text-gray-400';
-                            @endphp
-                            <span class="px-2 py-1 rounded-full text-[10px] font-bold uppercase {{ $color }}">
-                                {{ $order->status }}
-                            </span>
-                        </td>
-                        <td class="p-6 text-center">
-                            <a href="{{ route('admin.orders.show', $order) }}" class="text-xs font-bold text-blue-400 hover:text-blue-300">View</a>
-                        </td>
-                    </tr>
-                @empty
-                    <tr>
-                        <td colspan="8" class="p-10 text-center text-gray-400">No transactions found.</td>
-                    </tr>
-                @endforelse
-            </tbody>
-        </table>
-    </div>
-    <div class="p-6 border-t border-white/10">
-        {{ $orders->links('vendor.pagination.admin') }}
-    </div>
+                @forelse($transactions as $transaction)
+    <tr class="hover:bg-white/5 transition-colors cursor-pointer" onclick="window.location='{{ route('admin.orders.show', $transaction->id) }}'">
+        <td class="p-6">
+            <span class="font-mono text-xs text-blue-400">{{ $transaction->reference }}</span>
+        </td>
+        <td class="p-6">
+            <div class="text-sm font-bold text-white">{{ $transaction->user->name ?? 'Unknown' }}</div>
+            <div class="text-xs text-gray-500">{{ $transaction->user->email ?? '-' }}</div>
+        </td>
+        <td class="p-6">
+            <span class="px-2 py-1 rounded bg-white/5 text-xs">{{ strtoupper($transaction->source ?? $transaction->type) }}</span>
+            @if(isset($transaction->meta['network']))
+                <span class="text-xs text-gray-400 ml-1">{{ $transaction->meta['network'] }}</span>
+            @endif
+        </td>
+        <td class="p-6 font-mono font-bold text-sm">₦{{ number_format($transaction->amount, 2) }}</td>
+        <td class="p-6 text-xs text-gray-400 font-mono">{{ $transaction->meta['provider'] ?? '-' }}</td>
+        <td class="p-6 text-xs text-gray-400">{{ $transaction->created_at->format('M d, H:i') }}</td>
+        <td class="p-6">
+            @php
+                $statusColors = [
+                    'success' => 'bg-emerald-500/20 text-emerald-400',
+                    'failed' => 'bg-red-500/20 text-red-400',
+                    'pending' => 'bg-amber-500/20 text-amber-400',
+                    'reversed' => 'bg-purple-500/20 text-purple-400',
+                ];
+                $color = $statusColors[$transaction->status] ?? 'bg-gray-500/20 text-gray-400';
+            @endphp
+            <span class="px-2 py-1 rounded-full text-[10px] font-bold uppercase {{ $color }}">
+                {{ $transaction->status }}
+            </span>
+        </td>
+        <td class="p-6 text-center">
+            <a href="{{ route('admin.orders.show', $transaction->id) }}" class="text-xs font-bold text-blue-400 hover:text-blue-300">View</a>
+        </td>
+    </tr>
+@empty
+    <tr>
+        <td colspan="8" class="p-10 text-center text-gray-400">No transactions found.</td>
+    </tr>
+@endforelse
+</tbody>
+</table>
+</div>
+<div class="p-6 border-t border-white/10">
+{{ $transactions->links('vendor.pagination.admin') }}
+</div>
 </div>
 @endsection

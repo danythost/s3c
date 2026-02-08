@@ -25,7 +25,7 @@ class PurchaseAirtime
      */
     public function execute(User $user, array $data): VTUResponse
     {
-        $reference = $data['reference'] ?? 'A' . dechex(time()) . bin2hex(random_bytes(4));
+        $reference = $data['reference'] ?? substr(strtoupper(bin2hex(random_bytes(9))), 0, 17);
         $amount = $data['amount'];
         $userId = $user->id;
 

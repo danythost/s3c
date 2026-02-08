@@ -71,5 +71,22 @@ class AppServiceProvider extends ServiceProvider
         RateLimiter::for('admin_login', function (\Illuminate\Http\Request $request) {
             return Limit::perMinute(5)->by($request->ip());
         });
+
+        // View Composers
+        view()->composer('*', function ($view) {
+            $now = now();
+            $announcements = \App\Models\Announcement::where('is_active', true)
+                ->where(function ($query) use ($now) {
+                    $query->whereNull('start_at')
+                        ->orWhere('start_at', '<=', $now);
+                })
+                ->where(function ($query) use ($now) {
+                    $query->whereNull('end_at')
+                        ->orWhere('end_at', '>=', $now);
+                })
+                ->latest()
+                ->get();
+            $view->with('activeAnnouncements', $announcements);
+        });
     }
 }
