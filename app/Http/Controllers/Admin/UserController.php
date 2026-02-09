@@ -14,18 +14,7 @@ class UserController extends Controller
      */
     public function index(Request $request)
     {
-        $model = User::class;
-        $with = ['wallet'];
-
-        if ($request->status === 'admins') {
-            $model = Admin::class;
-            $with = [];
-        }
-
-        $query = $model::query()->latest();
-        if ($with) {
-            $query->with($with);
-        }
+        $query = User::query()->with(['wallet'])->latest();
 
         if ($request->filled('search')) {
             $query->where(function($q) use ($request) {
@@ -51,16 +40,7 @@ class UserController extends Controller
 
     public function show($id)
     {
-        $user = User::find($id);
-        
-        if (!$user) {
-            $user = Admin::find($id);
-        }
-
-        if (!$user) {
-            abort(404);
-        }
-
+        $user = User::findOrFail($id);
         $user->load(['wallet', 'transactions' => function($q) {
             $q->latest()->take(10);
         }]);
@@ -70,67 +50,57 @@ class UserController extends Controller
 
     public function toggleStatus($id)
     {
-        $user = User::find($id);
-        
-        if (!$user) {
-            $user = Admin::find($id);
-            if ($user) {
-                return back()->with('error', "Admin status cannot be toggled from here.");
-            }
-        }
-
-        if (!$user) {
-            abort(404);
-        }
-
+        $user = User::findOrFail($id);
         $user->update(['is_active' => !$user->is_active]);
         
         $status = $user->is_active ? 'activated' : 'suspended';
         return back()->with('success', "User has been {$status}.");
     }
 
-    /**
-     * Show the form for creating a new resource.
-     */
     public function create()
     {
-        //
+        return view('admin.users.create');
     }
 
-    /**
-     * Store a newly created resource in storage.
-     */
     public function store(Request $request)
     {
-        //
+        $request->validate([
+            'name' => 'required|string|max:255',
+            'username' => 'required|string|max:255|unique:users|unique:admins',
+            'email' => 'required|string|email|max:255|unique:users|unique:admins',
+            'password' => 'required|string|min:8',
+        ]);
+
+        $user = User::create([
+            'name' => $request->name,
+            'username' => $request->username,
+            'email' => $request->email,
+            'password' => $request->password,
+            'role' => 'user',
+            'is_active' => true,
+        ]);
+
+        return redirect()->route('admin.users.show', $user->id)
+            ->with('success', "User created successfully.");
     }
 
-    /**
-     * Display the specified resource.
-     */
-
-
-    /**
-     * Show the form for editing the specified resource.
-     */
     public function edit(User $user)
     {
         //
     }
 
-    /**
-     * Update the specified resource in storage.
-     */
     public function update(Request $request, User $user)
     {
         //
     }
 
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(User $user)
+    public function destroy($id)
     {
-        //
+        $user = User::findOrFail($id);
+        $name = $user->name;
+        $user->delete();
+
+        return redirect()->route('admin.users.index')
+            ->with('success', "Account for {$name} has been permanently deleted.");
     }
 }

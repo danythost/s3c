@@ -9,24 +9,37 @@
             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M15 19l-7-7 7-7"/></svg>
         </a>
         <div>
-            <h2 class="text-2xl font-bold">User Profile</h2>
+            <h2 class="text-2xl font-bold">{{ $user instanceof \App\Models\Admin ? 'Admin Profile' : 'User Profile' }}</h2>
             <p class="text-sm text-gray-400">{{ $user->email }}</p>
         </div>
     </div>
 
-    <form action="{{ route('admin.users.toggle', $user) }}" method="POST" onsubmit="return confirm('Are you sure you want to change this user\'s status?')">
-        @csrf
-        @method('PATCH')
-        <button type="submit" class="px-6 py-2 rounded-xl text-sm font-bold transition-all flex items-center gap-2 {{ $user->is_active ? 'bg-red-500/10 text-red-400 hover:bg-red-500 hover:text-white' : 'bg-emerald-500/10 text-emerald-400 hover:bg-emerald-500 hover:text-white' }}">
-            @if($user->is_active)
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636"/></svg>
-                Suspend User
-            @else
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-                Activate User
-            @endif
-        </button>
-    </form>
+    <div class="flex items-center gap-3">
+        @if($user instanceof \App\Models\User)
+        <form action="{{ route('admin.users.toggle', $user->id) }}" method="POST">
+            @csrf
+            @method('PATCH')
+            <button type="submit" class="px-6 py-2 rounded-xl text-sm font-bold transition-all flex items-center gap-2 {{ $user->is_active ? 'bg-red-500/10 text-red-400 hover:bg-red-500 hover:text-white' : 'bg-emerald-500/10 text-emerald-400 hover:bg-emerald-500 hover:text-white' }}">
+                @if($user->is_active)
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636"/></svg>
+                    Suspend User
+                @else
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                    Activate User
+                @endif
+            </button>
+        </form>
+        @endif
+
+        <form action="{{ $user instanceof \App\Models\Admin ? route('admin.admins.destroy', $user->id) : route('admin.users.destroy', $user->id) }}" method="POST" id="deleteUserForm">
+            @csrf
+            @method('DELETE')
+            <button type="button" onclick="confirmDelete()" class="px-6 py-2 rounded-xl text-sm font-bold bg-gray-500/10 text-gray-400 hover:bg-red-600 hover:text-white transition-all flex items-center gap-2 border border-white/5">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+                Delete Account
+            </button>
+        </form>
+    </div>
 </div>
 
 <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -40,16 +53,18 @@
             <p class="text-sm text-gray-400 mb-4">{{ $user->email }}</p>
             
             <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/5 text-xs font-bold text-gray-300">
-                <span class="w-2 h-2 rounded-full {{ $user->is_active ? 'bg-emerald-400' : 'bg-red-400' }}"></span>
-                {{ $user->is_active ? 'Active Account' : 'Suspended' }}
+                <span class="w-2 h-2 rounded-full {{ ($user instanceof \App\Models\Admin || $user->is_active) ? 'bg-emerald-400' : 'bg-red-400' }}"></span>
+                {{ ($user instanceof \App\Models\Admin || $user->is_active) ? 'Active Account' : 'Suspended' }}
             </div>
         </div>
 
+        @if($user instanceof \App\Models\User)
         <div class="glass p-6 rounded-2xl">
             <h4 class="text-sm font-bold text-gray-400 uppercase mb-4">Wallet Balance</h4>
             <h2 class="text-3xl font-bold text-white mb-1">₦{{ number_format($user->wallet->balance ?? 0, 2) }}</h2>
             <p class="text-xs text-gray-500">Available Funds</p>
         </div>
+        @endif
 
         <div class="glass p-6 rounded-2xl">
             <h4 class="text-sm font-bold text-gray-400 uppercase mb-4">Account Info</h4>
@@ -72,6 +87,7 @@
 
     <!-- Activity -->
     <div class="lg:col-span-2 space-y-6">
+        @if($user instanceof \App\Models\User)
         <div class="glass p-6 rounded-2xl">
             <h3 class="text-lg font-bold mb-6">Recent Transactions</h3>
             <div class="overflow-x-auto">
@@ -115,6 +131,15 @@
                 </table>
             </div>
         </div>
+        @else
+        <div class="glass p-12 rounded-3xl flex flex-col items-center justify-center text-center">
+            <div class="w-20 h-20 rounded-full bg-purple-500/10 flex items-center justify-center text-purple-400 mb-6">
+                <svg class="w-10 h-10" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>
+            </div>
+            <h3 class="text-xl font-bold text-white mb-2">Administrator Account</h3>
+            <p class="text-gray-400 max-w-sm">This is a system administrator account. Administrators have full access to the platform management features.</p>
+        </div>
+        @endif
 
         <!-- Login Logs (Mock) -->
         <div class="glass p-6 rounded-2xl">
@@ -135,4 +160,30 @@
         </div>
     </div>
 </div>
+<script>
+    function confirmDelete() {
+        Swal.fire({
+            title: 'Are you sure?',
+            text: "This action is permanent and will delete all user data!",
+            icon: 'warning',
+            showCancelButton: true,
+            background: '#1a1a2e',
+            color: '#fff',
+            confirmButtonColor: '#ef4444',
+            cancelButtonColor: '#6b7280',
+            confirmButtonText: 'Yes, delete it!',
+            cancelButtonText: 'Cancel',
+            customClass: {
+                popup: 'rounded-3xl border border-white/10 glass shadow-2xl',
+                title: 'text-2xl font-black tracking-tight mb-4',
+                confirmButton: 'rounded-xl px-8 py-3 font-bold uppercase tracking-widest text-xs',
+                cancelButton: 'rounded-xl px-8 py-3 font-bold uppercase tracking-widest text-xs'
+            }
+        }).then((result) => {
+            if (result.isConfirmed) {
+                document.getElementById('deleteUserForm').submit();
+            }
+        });
+    }
+</script>
 @endsection

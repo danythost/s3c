@@ -55,6 +55,7 @@ Route::middleware(['auth'])->group(function () {
 
     // Auth
     Route::post('/logout', [LoginController::class, 'logout'])->name('logout');
+    Route::get('/logout', [LoginController::class, 'logout']);
 });
 
 // Admin Routes
@@ -67,6 +68,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
 
     Route::middleware('auth:admin')->group(function () {
         Route::post('/logout', [\App\Http\Controllers\Admin\AdminAuthController::class, 'logout'])->name('logout');
+        Route::get('/logout', [\App\Http\Controllers\Admin\AdminAuthController::class, 'logout']);
 
         Route::get('/dashboard', [\App\Http\Controllers\Admin\DashboardController::class, 'index'])->name('dashboard');
         
@@ -91,6 +93,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
         // User Management
         Route::patch('/users/{user}/toggle', [\App\Http\Controllers\Admin\UserController::class, 'toggleStatus'])->name('users.toggle');
         Route::resource('users', \App\Http\Controllers\Admin\UserController::class);
+        Route::resource('admins', \App\Http\Controllers\Admin\AdminController::class);
 
         // Finance & Wallet
         Route::get('/finance', [\App\Http\Controllers\Admin\FinanceController::class, 'index'])->name('finance.index');

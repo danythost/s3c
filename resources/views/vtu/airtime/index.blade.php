@@ -50,7 +50,7 @@
                             <label class="cursor-pointer group relative">
                                 <input type="radio" name="network" value="{{ $networkName }}" class="peer hidden" required 
                                         {{ old('network') == $networkName ? 'checked' : '' }}>
-                                <div class="glass h-24 rounded-2xl border border-white/5 flex flex-col items-center justify-center gap-2 peer-checked:bg-[#FBBC05] peer-checked:backdrop-blur-[20px] peer-checked:border-white/30 peer-checked:ring-2 peer-checked:ring-[#FBBC05]/50 transition-all hover:bg-white/5 active:scale-95"
+                                <div class="glass h-24 rounded-2xl border border-white/5 flex flex-col items-center justify-center gap-2 peer-checked:bg-[#FBBC05]/90 peer-checked:backdrop-blur-xl peer-checked:border-[#FBBC05]/50 peer-checked:ring-2 peer-checked:ring-[#FBBC05]/50 transition-all hover:bg-white/5 active:scale-95"
                                      style="transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);">
                                     <!-- Selection Indicator -->
                                     <div class="absolute top-2 right-2 opacity-0 peer-checked:opacity-100 transition-opacity">
@@ -157,7 +157,7 @@
         networkInputs.forEach(input => {
             input.addEventListener('change', function() {
                 summaryNetwork.textContent = this.value;
-                summaryNetwork.classList.add('text-blue-400');
+                summaryNetwork.style.color = '#FBBC05';
             });
         });
 

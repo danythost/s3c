@@ -9,26 +9,41 @@
     <!-- Status Tabs -->
     <div class="flex flex-wrap gap-2 text-sm font-medium border-b border-white/10 pb-1">
         <a href="{{ route('admin.users.index') }}" 
-           class="px-4 py-2 rounded-t-lg hover:bg-white/5 transition-colors {{ !request('status') ? 'text-blue-400 border-b-2 border-blue-400' : 'text-gray-400' }}">
+           class="px-4 py-2 rounded-t-lg hover:bg-white/5 transition-colors {{ request()->routeIs('admin.users.index') && !request('status') ? 'text-blue-400 border-b-2 border-blue-400' : 'text-gray-400' }}">
             All Users
         </a>
         <a href="{{ route('admin.users.index', ['status' => 'active']) }}" 
-           class="px-4 py-2 rounded-t-lg hover:bg-white/5 transition-colors {{ request('status') == 'active' ? 'text-emerald-400 border-b-2 border-emerald-400' : 'text-gray-400' }}">
+           class="px-4 py-2 rounded-t-lg hover:bg-white/5 transition-colors {{ request()->routeIs('admin.users.index') && request('status') == 'active' ? 'text-emerald-400 border-b-2 border-emerald-400' : 'text-gray-400' }}">
             Active Users
         </a>
         <a href="{{ route('admin.users.index', ['status' => 'suspended']) }}" 
-           class="px-4 py-2 rounded-t-lg hover:bg-white/5 transition-colors {{ request('status') == 'suspended' ? 'text-red-400 border-b-2 border-red-400' : 'text-gray-400' }}">
+           class="px-4 py-2 rounded-t-lg hover:bg-white/5 transition-colors {{ request()->routeIs('admin.users.index') && request('status') == 'suspended' ? 'text-red-400 border-b-2 border-red-400' : 'text-gray-400' }}">
             Suspended Users
         </a>
-        <a href="{{ route('admin.users.index', ['status' => 'admins']) }}" 
-           class="px-4 py-2 rounded-t-lg hover:bg-white/5 transition-colors {{ request('status') == 'admins' ? 'text-purple-400 border-b-2 border-purple-400' : 'text-gray-400' }}">
+        <a href="{{ route('admin.admins.index') }}" 
+           class="px-4 py-2 rounded-t-lg hover:bg-white/5 transition-colors {{ request()->routeIs('admin.admins.*') ? 'text-purple-400 border-b-2 border-purple-400' : 'text-gray-400' }}">
             Admins
         </a>
     </div>
 </div>
 
-<!-- Search -->
-<div class="mb-6 flex justify-end">
+<!-- Search and Actions -->
+<div class="mb-6 flex flex-wrap items-center justify-between gap-4">
+    @if(request()->routeIs('admin.admins.*'))
+    <a href="{{ route('admin.admins.create') }}" class="glass bg-purple-500/20 text-purple-400 px-6 py-2.5 rounded-xl text-xs font-bold hover:bg-purple-500/30 transition-all flex items-center gap-2">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+        </svg>
+        Add New Admin
+    </a>
+    @else
+    <a href="{{ route('admin.users.create') }}" class="glass bg-blue-500/20 text-blue-400 px-6 py-2.5 rounded-xl text-xs font-bold hover:bg-blue-500/30 transition-all flex items-center gap-2">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+        </svg>
+        Add New User
+    </a>
+    @endif
     <form method="GET" class="flex gap-2">
         <input type="hidden" name="status" value="{{ request('status') }}">
         <input type="text" name="search" value="{{ request('search') }}" placeholder="Name or Email..." 
@@ -53,7 +68,10 @@
             </thead>
             <tbody class="divide-y divide-white/5">
                 @forelse($users as $user)
-                    <tr class="hover:bg-white/5 transition-colors group cursor-pointer" onclick="window.location='{{ route('admin.users.show', $user) }}'">
+                    @php 
+                        $showRoute = request()->routeIs('admin.admins.*') ? route('admin.admins.show', $user) : route('admin.users.show', $user);
+                    @endphp
+                    <tr class="hover:bg-white/5 transition-colors group cursor-pointer" onclick="window.location='{{ $showRoute }}'">
                         <td class="p-6">
                             <div class="flex items-center gap-3">
                                 <div class="w-8 h-8 rounded-full bg-blue-500/20 flex items-center justify-center text-blue-400 font-bold text-xs">
@@ -86,7 +104,7 @@
                         </td>
                         <td class="p-6 text-xs text-gray-400 py-6">{{ $user->created_at->format('M d, Y') }}</td>
                         <td class="p-6 text-center">
-                            <a href="{{ route('admin.users.show', $user) }}" class="text-xs font-bold text-blue-400 hover:text-blue-300">View</a>
+                            <a href="{{ $showRoute }}" class="text-xs font-bold text-blue-400 hover:text-blue-300">View</a>
                         </td>
                     </tr>
                 @empty
