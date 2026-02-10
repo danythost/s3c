@@ -47,26 +47,79 @@
 
                     <div class="grid grid-cols-2 sm:grid-cols-4 gap-4" id="networkSelection">
                         @foreach(['MTN', 'Airtel', 'GLO', '9mobile'] as $networkName)
-                            <label class="cursor-pointer group relative">
-                                <input type="radio" name="network" value="{{ $networkName }}" class="peer hidden" required 
-                                        {{ old('network') == $networkName ? 'checked' : '' }}>
-                                <div class="glass h-24 rounded-2xl border border-white/5 flex flex-col items-center justify-center gap-2 peer-checked:bg-[#FBBC05]/90 peer-checked:backdrop-blur-xl peer-checked:border-[#FBBC05]/50 peer-checked:ring-2 peer-checked:ring-[#FBBC05]/50 transition-all hover:bg-white/5 active:scale-95"
-                                     style="transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);">
-                                    <!-- Selection Indicator -->
-                                    <div class="absolute top-2 right-2 opacity-0 peer-checked:opacity-100 transition-opacity">
-                                        <div class="bg-gray-900/80 backdrop-blur-sm rounded-full p-0.5 shadow-lg">
-                                            <svg class="w-3.5 h-3.5 text-[#FBBC05]" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="4">
-                                                <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/>
-                                            </svg>
-                                        </div>
+                            <label class="cursor-pointer relative">
+                                <input
+                                    type="radio"
+                                    name="network"
+                                    value="{{ $networkName }}"
+                                    class="peer hidden"
+                                    required
+                                    {{ old('network') == $networkName ? 'checked' : '' }}
+                                >
+
+                                <div
+                                    class="
+                                        relative glass h-24 rounded-2xl
+                                        border border-white/10
+                                        flex flex-col items-center justify-center gap-2
+                                        transition-all duration-300 ease-out
+                                        hover:bg-white/5 hover:scale-[1.02]
+                                        peer-checked:border-emerald-500
+                                        peer-checked:bg-emerald-500/10
+                                        peer-checked:ring-2 peer-checked:ring-emerald-400/40
+                                        peer-disabled:opacity-30
+                                        peer-disabled:cursor-not-allowed
+                                        active:scale-95
+                                    "
+                                >
+                                    <!-- Tick Indicator -->
+                                    <div
+                                        class="
+                                            absolute top-2 right-2
+                                            w-6 h-6 rounded-full
+                                            bg-emerald-500
+                                            text-white
+                                            flex items-center justify-center
+                                            opacity-0 scale-75
+                                            transition-all duration-300
+                                            peer-checked:opacity-100
+                                            peer-checked:scale-100
+                                            peer-checked:animate-pop
+                                            shadow-lg
+                                        "
+                                    >
+                                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="3">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/>
+                                        </svg>
                                     </div>
 
-                                    <div class="w-12 h-12 rounded-xl overflow-hidden group-hover:scale-110 transition-transform bg-white/10 flex items-center justify-center">
-                                        <img src="{{ asset('images/networks/' . strtolower($networkName) . '.png') }}" 
-                                             alt="{{ $networkName }}" 
-                                             class="w-full h-full object-cover">
+                                    <!-- Network Logo -->
+                                    <div
+                                        class="
+                                            w-12 h-12 rounded-xl overflow-hidden
+                                            bg-white/10
+                                            flex items-center justify-center
+                                            transition-transform
+                                            peer-checked:scale-110
+                                        "
+                                    >
+                                        <img
+                                            src="{{ asset('images/networks/' . strtolower($networkName) . '.png') }}"
+                                            alt="{{ $networkName }}"
+                                            class="w-full h-full object-cover"
+                                        >
                                     </div>
-                                    <span class="block text-[10px] font-black uppercase tracking-widest text-gray-400 peer-checked:text-gray-900">{{ $networkName }}</span>
+
+                                    <!-- Network Name -->
+                                    <span
+                                        class="
+                                            text-[10px] font-black uppercase tracking-widest
+                                            text-gray-400
+                                            peer-checked:text-emerald-400
+                                        "
+                                    >
+                                        {{ $networkName }}
+                                    </span>
                                 </div>
                             </label>
                         @endforeach
@@ -157,13 +210,34 @@
         networkInputs.forEach(input => {
             input.addEventListener('change', function() {
                 summaryNetwork.textContent = this.value;
-                summaryNetwork.style.color = '#FBBC05';
+                summaryNetwork.style.color = '#10b981'; // Match emerald theme
             });
         });
 
         phoneInput.addEventListener('input', function() {
-            summaryPhone.textContent = this.value || '-';
-            summaryPhone.classList.toggle('text-blue-400', this.value.length > 0);
+            const phone = this.value;
+            summaryPhone.textContent = phone || '-';
+            summaryPhone.classList.toggle('text-blue-400', phone.length > 0);
+
+            // Auto-select network based on prefix
+            if (phone.length >= 4) {
+                const prefix = phone.substring(0, 4);
+                const networkMap = {
+                    '0803': 'MTN', '0806': 'MTN', '0813': 'MTN', '0816': 'MTN', '0810': 'MTN', '0814': 'MTN', '0903': 'MTN', '0906': 'MTN', '0703': 'MTN', '0706': 'MTN',
+                    '0805': 'GLO', '0807': 'GLO', '0811': 'GLO', '0815': 'GLO', '0905': 'GLO', '0705': 'GLO',
+                    '0802': 'Airtel', '0808': 'Airtel', '0812': 'Airtel', '0701': 'Airtel', '0708': 'Airtel', '0902': 'Airtel', '0907': 'Airtel', '0901': 'Airtel',
+                    '0809': '9mobile', '0817': '9mobile', '0818': '9mobile', '0908': '9mobile', '0909': '9mobile'
+                };
+
+                const detectedNetwork = networkMap[prefix];
+                if (detectedNetwork) {
+                    const radio = document.querySelector(`input[name="network"][value="${detectedNetwork}"]`);
+                    if (radio && !radio.checked && !radio.disabled) {
+                        radio.checked = true;
+                        radio.dispatchEvent(new Event('change'));
+                    }
+                }
+            }
         });
 
         amountInput.addEventListener('input', function() {

@@ -62,7 +62,8 @@ class EpinsVTUService implements VTUProviderInterface
             }
 
             if (!$response->successful()) {
-                return VTUResponse::failure('EPINS API returned error ' . $response->status(), [
+                $errorMessage = $responseData['description'] ?? ($responseData['message'] ?? 'EPINS API returned error ' . $response->status());
+                return VTUResponse::failure($errorMessage, [
                     'raw' => $responseData ?? [],
                     'reference' => $reference
                 ]);
@@ -70,7 +71,8 @@ class EpinsVTUService implements VTUProviderInterface
 
             // Success is either boolean true or "success" string or code 101
             if (($responseData['status'] ?? false) !== true && strtolower($responseData['status'] ?? '') !== 'success' && ($responseData['code'] ?? '') != '101') {
-                return VTUResponse::failure($responseData['message'] ?? ($responseData['description'] ?? 'Data purchase failed'), $responseData);
+                $errorMessage = $responseData['description'] ?? ($responseData['message'] ?? 'Data purchase failed');
+                return VTUResponse::failure($errorMessage, $responseData);
             }
 
             return VTUResponse::success('Data purchase successful', $responseData, $reference);
@@ -92,43 +94,48 @@ class EpinsVTUService implements VTUProviderInterface
             $startTime = microtime(true);
             
             $requestBody = [
-                'network' => $networkId,
-                'phone'   => $payload['phone'],
+                'network' => (string) $networkId,
+                'phone'   => (string) $payload['phone'],
                 'amount'  => (int) $payload['amount'],
                 'ref'     => $reference,
             ];
 
-            $response = Http::timeout(30)
-                ->withHeaders([
-                    'Authorization' => 'Bearer ' . $this->apiKey,
-                    'Content-Type'  => 'application/json',
-                    'Accept'        => 'application/json',
+            $response = Http::withToken($this->apiKey)
+                ->acceptJson()
+                ->timeout(40)
+                ->connectTimeout(15)
+                ->withOptions([
+                    'curl' => [
+                        CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
+                    ],
                 ])
-                ->withBody(json_encode($requestBody), 'application/json')
                 ->post(rtrim($this->baseUrl, '/') . '/airtime/', $requestBody);
 
             $duration = (int) ((microtime(true) - $startTime) * 1000);
+            $responseData = $response->json() ?? [];
 
-            ApiLogger::log('epins', 'POST', $this->baseUrl . 'airtime/', $requestBody, $response->json(), $response->status(), $duration);
+            try {
+                ApiLogger::log('epins', 'POST', rtrim($this->baseUrl, '/') . '/airtime/', $requestBody, $responseData, $response->status(), $duration);
+            } catch (\Throwable $logError) {
+            }
 
             if (!$response->successful()) {
-                return VTUResponse::failure('EPINS API request failed', ['raw' => $response->json() ?? []]);
+                $errorMessage = $responseData['description'] ?? ($responseData['message'] ?? 'EPINS API request failed');
+                return VTUResponse::failure($errorMessage, ['raw' => $responseData ?? []]);
             }
-
-            $data = $response->json();
 
             // Success is either boolean true or "success" string or code 101
-            if (($data['status'] ?? false) !== true && strtolower($data['status'] ?? '') !== 'success' && ($data['code'] ?? '') != '101') {
-                return VTUResponse::failure($data['description'] ?? ($data['message'] ?? 'Airtime purchase failed'), $data);
+            if (($responseData['status'] ?? false) !== true && strtolower($responseData['status'] ?? '') !== 'success' && ($responseData['code'] ?? '') != '101') {
+                $errorMessage = $responseData['description'] ?? ($responseData['message'] ?? 'Airtime purchase failed');
+                return VTUResponse::failure($errorMessage, $responseData);
             }
 
-
-            $message = $data['description'] ?? $data['message'] ?? 'Airtime purchase successful';
+            $message = $responseData['description'] ?? ($responseData['message'] ?? 'Airtime purchase successful');
             if (is_array($message)) {
                 $message = 'Airtime purchase successful';
             }
             
-            return VTUResponse::success($message, $data, $reference);
+            return VTUResponse::success($message, $responseData, $reference);
 
         } catch (\Throwable $e) {
             return VTUResponse::failure('VTU service unreachable: ' . $e->getMessage());
