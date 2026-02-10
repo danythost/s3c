@@ -86,7 +86,7 @@
                                             transition-all duration-300
                                             peer-checked:opacity-100
                                             peer-checked:scale-100
-                                            peer-checked:animate-pop
+                                            peer-checked:scale-100
                                             shadow-lg
                                         "
                                     >
@@ -221,24 +221,6 @@
                 const network = this.value.toUpperCase();
                 const plans = plansData[network] || [];
                 
-                if (plans.length === 0 && this.checked) {
-                    planContainer.classList.add('hidden');
-                    Swal.fire({
-                        title: 'Unavailable',
-                        text: `No data plans are currently available for ${this.value}.`,
-                        icon: 'warning',
-                        background: '#1a1a2e',
-                        color: '#fff',
-                        confirmButtonColor: '#3b82f6',
-                        customClass: {
-                            popup: 'rounded-[2rem] border border-white/10 glass shadow-2xl',
-                            confirmButton: 'rounded-xl px-8 py-4 font-black uppercase tracking-widest text-xs'
-                        }
-                    });
-                    this.checked = false;
-                    return;
-                }
-
                 summaryNetwork.textContent = this.value;
                 summaryNetwork.style.color = '#10b981'; // Match emerald theme
                 
@@ -270,26 +252,7 @@
             const phone = this.value;
             summaryPhone.textContent = phone || '-';
             summaryPhone.classList.toggle('text-blue-400', phone.length > 0);
-
-            // Auto-select network based on prefix
-            if (phone.length >= 4) {
-                const prefix = phone.substring(0, 4);
-                const networkMap = {
-                    '0803': 'MTN', '0806': 'MTN', '0813': 'MTN', '0816': 'MTN', '0810': 'MTN', '0814': 'MTN', '0903': 'MTN', '0906': 'MTN', '0703': 'MTN', '0706': 'MTN',
-                    '0805': 'GLO', '0807': 'GLO', '0811': 'GLO', '0815': 'GLO', '0905': 'GLO', '0705': 'GLO',
-                    '0802': 'Airtel', '0808': 'Airtel', '0812': 'Airtel', '0701': 'Airtel', '0708': 'Airtel', '0902': 'Airtel', '0907': 'Airtel', '0901': 'Airtel',
-                    '0809': '9mobile', '0817': '9mobile', '0818': '9mobile', '0908': '9mobile', '0909': '9mobile'
-                };
-
-                const detectedNetwork = networkMap[prefix];
-                if (detectedNetwork) {
-                    const radio = document.querySelector(`input[name="network"][value="${detectedNetwork}"]`);
-                    if (radio && !radio.checked && !radio.disabled) {
-                        radio.checked = true;
-                        radio.dispatchEvent(new Event('change'));
-                    }
-                }
-            }
+            summaryPhone.classList.toggle('text-blue-400', phone.length > 0);
         });
 
         const dataPurchaseForm = document.getElementById('dataPurchaseForm');

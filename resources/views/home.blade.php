@@ -139,11 +139,11 @@
 
         <!-- CEO Section -->
         @if(isset($pages['ceo']))
-        <div class="mt-32 max-w-4xl mx-auto">
+        <div class="mt-40 max-w-4xl mx-auto">
             <div class="glass p-10 rounded-[3rem] border-white/5 relative overflow-hidden flex flex-col md:flex-row items-center gap-10">
                 <!-- CEO Image -->
                 <div class="shrink-0 relative group">
-                    <div class="w-48 h-48 md:w-56 md:h-56 rounded-full overflow-hidden border-4 border-blue-500/20 relative z-10">
+                    <div class="w-48 h-48 md:w-56 md:h-56 aspect-square rounded-full overflow-hidden border-4 border-blue-500/20 relative z-10">
                         @if($pages['ceo']->image_url)
                             <img src="{{ asset($pages['ceo']->image_url) }}" alt="{{ $pages['ceo']->meta['name'] ?? 'CEO' }}" class="w-full h-full object-cover">
                         @else

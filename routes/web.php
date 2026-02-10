@@ -134,3 +134,4 @@ Route::prefix('admin')->name('admin.')->group(function () {
 Route::post('/webhooks/flutterwave', [\App\Http\Controllers\Webhooks\FlutterwaveWebhookController::class, 'handle']);
 
 Route::post('/webhooks/vtuafrica', \App\Http\Controllers\Webhooks\VtuAfricaWebhookController::class)->name('webhooks.vtuafrica');
+Route::post('/webhooks/epins', [\App\Http\Controllers\Webhooks\EpinsWebhookController::class, 'handle'])->name('webhooks.epins');

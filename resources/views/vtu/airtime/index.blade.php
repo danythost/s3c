@@ -84,7 +84,7 @@
                                             transition-all duration-300
                                             peer-checked:opacity-100
                                             peer-checked:scale-100
-                                            peer-checked:animate-pop
+                                            peer-checked:scale-100
                                             shadow-lg
                                         "
                                     >
@@ -218,26 +218,7 @@
             const phone = this.value;
             summaryPhone.textContent = phone || '-';
             summaryPhone.classList.toggle('text-blue-400', phone.length > 0);
-
-            // Auto-select network based on prefix
-            if (phone.length >= 4) {
-                const prefix = phone.substring(0, 4);
-                const networkMap = {
-                    '0803': 'MTN', '0806': 'MTN', '0813': 'MTN', '0816': 'MTN', '0810': 'MTN', '0814': 'MTN', '0903': 'MTN', '0906': 'MTN', '0703': 'MTN', '0706': 'MTN',
-                    '0805': 'GLO', '0807': 'GLO', '0811': 'GLO', '0815': 'GLO', '0905': 'GLO', '0705': 'GLO',
-                    '0802': 'Airtel', '0808': 'Airtel', '0812': 'Airtel', '0701': 'Airtel', '0708': 'Airtel', '0902': 'Airtel', '0907': 'Airtel', '0901': 'Airtel',
-                    '0809': '9mobile', '0817': '9mobile', '0818': '9mobile', '0908': '9mobile', '0909': '9mobile'
-                };
-
-                const detectedNetwork = networkMap[prefix];
-                if (detectedNetwork) {
-                    const radio = document.querySelector(`input[name="network"][value="${detectedNetwork}"]`);
-                    if (radio && !radio.checked && !radio.disabled) {
-                        radio.checked = true;
-                        radio.dispatchEvent(new Event('change'));
-                    }
-                }
-            }
+            summaryPhone.classList.toggle('text-blue-400', phone.length > 0);
         });
 
         amountInput.addEventListener('input', function() {
