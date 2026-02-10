@@ -88,7 +88,8 @@ class EpinsVTUService implements VTUProviderInterface
     public function purchaseAirtime(array $payload): VTUResponse
     {
         $reference = $payload['reference'] ?? 'A' . dechex(time()) . bin2hex(random_bytes(4));
-        $networkId = $this->mapNetwork($payload['network'] ?? '');
+        // Use mapNetworkName for airtime as it requires strings like 'mtn', 'airtel'
+        $networkId = $this->mapNetworkName($payload['network'] ?? '');
         
         try {
             $startTime = microtime(true);
