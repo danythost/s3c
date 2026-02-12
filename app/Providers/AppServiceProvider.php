@@ -40,11 +40,15 @@ class AppServiceProvider extends ServiceProvider
         );
 
         Event::listen(Login::class, function ($event) {
+            $user = $event->user;
+            $isAdmin = $user instanceof \App\Models\Admin;
+
             LoginHistory::create([
-                'user_id' => $event->user->id,
-                'email' => $event->user->email,
-                'username' => $event->user->username,
-                'role' => $event->user->role ?? 'user',
+                'user_id' => $isAdmin ? null : $user->id,
+                'admin_id' => $isAdmin ? $user->id : null,
+                'email' => $user->email,
+                'username' => $user->username,
+                'role' => $isAdmin ? 'admin' : ($user->role ?? 'user'),
                 'ip_address' => Request::ip(),
                 'user_agent' => Request::userAgent(),
                 'status' => 'success',
@@ -52,11 +56,15 @@ class AppServiceProvider extends ServiceProvider
         });
 
         Event::listen(Failed::class, function ($event) {
+            $user = $event->user;
+            $isAdmin = $user instanceof \App\Models\Admin;
+
             LoginHistory::create([
-                'user_id' => $event->user ? $event->user->id : null,
+                'user_id' => $isAdmin ? null : ($user ? $user->id : null),
+                'admin_id' => $isAdmin ? $user->id : null, 
                 'email' => $event->credentials['email'] ?? null,
                 'username' => $event->credentials['username'] ?? 'unknown',
-                'role' => $event->user ? ($event->user->role ?? 'user') : null,
+                'role' => $user ? ($isAdmin ? 'admin' : ($user->role ?? 'user')) : null,
                 'ip_address' => Request::ip(),
                 'user_agent' => Request::userAgent(),
                 'status' => 'failed',
