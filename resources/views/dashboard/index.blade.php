@@ -108,19 +108,24 @@
                     <div class="flex items-center justify-between p-4 glass rounded-[1.5rem] border-white/5 hover:bg-white/5 transition-colors">
                         <div class="flex items-center gap-4">
                             <div class="w-10 h-10 rounded-xl bg-white/5 flex items-center justify-center text-lg">
-                                @if($activity->activity_type === 'order')
-                                    {{ $activity->type === 'vtu-data' ? '📶' : ($activity->type === 'vtu-airtime' ? '📞' : '💳') }}
-                                @else
+                                @if($activity->source === 'wallet_funding')
                                     💰
+                                @elseif($activity->source === 'data')
+                                    📶
+                                @elseif($activity->source === 'airtime')
+                                    📞
+                                @elseif($activity->source === 'vtuafrica_a2c')
+                                    🔄
+                                @else
+                                    💳
                                 @endif
                             </div>
                             <div>
                                 <p class="text-xs font-bold text-white">
-                                    @if($activity->activity_type === 'order')
-                                        {{ ucfirst(str_replace('-', ' ', $activity->type)) }}
-                                    @else
-                                        Airtime to Cash
-                                    @endif
+                                    {{ ucfirst(str_replace(['_', '-'], ' ', $activity->source)) }}
+                                    <span class="ml-2 px-2 py-0.5 rounded-full text-[8px] uppercase font-bold {{ $activity->type === 'credit' ? 'bg-emerald-500/10 text-emerald-400' : 'bg-rose-500/10 text-rose-400' }}">
+                                        {{ $activity->type }}
+                                    </span>
                                 </p>
                                 <p class="text-[10px] text-gray-500">{{ $activity->created_at->diffForHumans() }}</p>
                             </div>

@@ -33,19 +33,10 @@ class DashboardController extends Controller
             ->where('created_at', '>=', $monthStart)
             ->sum('amount');
 
-        $orders = $user->orders()->latest()->take(10)->get()->map(function($item) {
-            $item->activity_type = 'order';
-            return $item;
-        });
-
-        $a2c = $user->a2cRequests()->latest()->take(10)->get()->map(function($item) {
-            $item->activity_type = 'a2c';
-            return $item;
-        });
-
-        $activities = $orders->concat($a2c)
-            ->sortByDesc('created_at')
-            ->take(6);
+        $activities = $user->transactions()
+            ->latest()
+            ->take(6)
+            ->get();
 
         return view('dashboard.index', [
             'user' => $user,
