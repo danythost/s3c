@@ -14,19 +14,38 @@ class FlutterwaveWebhookController extends Controller
 {
     public function handle(Request $request, FlutterwaveService $flwService)
     {
-        // 1. Verify Secret Hash
+        $payload = $request->all();
+        $event = $payload['event'] ?? 'unknown';
+
+        // 1. Log the payload for debugging (File & Database)
+        Log::info('Flutterwave Webhook Received', [
+            'url' => $request->fullUrl(),
+            'event' => $event,
+            'tx_ref' => $payload['tx_ref'] ?? 'N/A'
+        ]);
+
+        try {
+            \App\Services\Logger\ApiLogger::log(
+                'flutterwave-webhook',
+                $request->method(),
+                $request->fullUrl(),
+                $payload,
+                ['status' => 'received', 'event' => $event],
+                200,
+                0
+            );
+        } catch (\Throwable $e) {
+            Log::error('Failed to log Flutterwave Webhook to database: ' . $e->getMessage());
+        }
+
+        // 2. Verify Secret Hash
         $secretHash = config('services.flutterwave.secret_hash');
         $signature = $request->header('verif-hash');
 
-        if (!$signature || ($signature !== $secretHash)) {
+        if ($secretHash && (!$signature || ($signature !== $secretHash))) {
             Log::warning('Flutterwave Webhook: Invalid Secret Hash');
             return response()->json(['message' => 'Unauthorized'], 401);
         }
-
-        $payload = $request->all();
-        $event = $payload['event'] ?? '';
-
-        Log::info('Flutterwave Webhook Received', ['event' => $event, 'tx_ref' => $payload['tx_ref'] ?? 'N/A']);
 
         if ($event === 'charge.completed' && ($payload['status'] ?? '') === 'successful') {
             return $this->processPayment($payload, $flwService);

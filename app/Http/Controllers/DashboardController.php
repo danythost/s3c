@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Announcement;
+use App\Models\WalletTransaction;
 use Illuminate\Http\Request;
 
 class DashboardController extends Controller
@@ -11,25 +12,28 @@ class DashboardController extends Controller
     {
         $user = $request->user();
 
-        // Stats calculations
-        $totalOrders = $user->orders()->count();
-        $totalA2C = $user->a2cRequests()->count();
-        $totalActivity = $totalOrders + $totalA2C;
+        // Stats calculations from WalletTransactions
+        $totalActivityTotal = $user->transactions()->count();
 
         // Monthly stats
         $monthStart = now()->startOfMonth();
-        $monthlySuccessfulOrders = $user->orders()
+        
+        $monthlySuccessfulSales = $user->transactions()
             ->whereIn('status', ['success', 'completed'])
+            ->whereIn('source', ['data', 'airtime'])
             ->where('created_at', '>=', $monthStart)
             ->count();
-        $monthlyOrders = $user->orders()
+
+        $monthlyTotalSales = $user->transactions()
+            ->whereIn('source', ['data', 'airtime'])
             ->where('created_at', '>=', $monthStart)
             ->count();
         
-        $successRate = $monthlyOrders > 0 ? ($monthlySuccessfulOrders / $monthlyOrders) * 100 : 100;
+        $successRate = $monthlyTotalSales > 0 ? ($monthlySuccessfulSales / $monthlyTotalSales) * 100 : 100;
         
-        $monthlyVolume = $user->orders()
+        $monthlyVolume = $user->transactions()
             ->whereIn('status', ['success', 'completed'])
+            ->where('type', 'debit') // Spending volume
             ->where('created_at', '>=', $monthStart)
             ->sum('amount');
 
@@ -42,7 +46,7 @@ class DashboardController extends Controller
             'user' => $user,
             'activities' => $activities,
             'stats' => [
-                'total_activity' => $totalActivity,
+                'total_activity' => $totalActivityTotal,
                 'success_rate' => $successRate,
                 'monthly_volume' => $monthlyVolume,
             ]

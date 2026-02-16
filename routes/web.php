@@ -128,6 +128,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
         // Security & Audit
         Route::get('/security', [\App\Http\Controllers\Admin\SecurityController::class, 'index'])->name('security.index');
         Route::get('/logs/api', [\App\Http\Controllers\Admin\ApiLogController::class, 'index'])->name('logs.api');
+        Route::get('/logs/api/{log}', [\App\Http\Controllers\Admin\ApiLogController::class, 'show'])->name('logs.api.show');
     });
 });
 

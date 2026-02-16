@@ -5,6 +5,7 @@ namespace App\Listeners;
 use App\Models\VirtualAccount;
 use App\Services\Flutterwave\FlutterwaveService;
 use Illuminate\Auth\Events\Registered;
+use Illuminate\Support\Facades\Log;
 class CreateVirtualAccountForUser
 {
 
@@ -27,8 +28,7 @@ class CreateVirtualAccountForUser
         $result = $this->flwService->createVirtualAccount([
             'user_id'   => $user->id,
             'email'     => $user->email,
-            'firstname' => explode(' ', $user->name)[0] ?? 'User',
-            'lastname'  => explode(' ', $user->name)[1] ?? $user->id,
+            'va_username' => 's3c-' . ($user->username ?? $user->id),
             'phone'     => $user->phone ?? null,
             'bvn'       => config('services.flutterwave.test_bvn'),
         ]);

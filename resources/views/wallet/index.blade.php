@@ -62,7 +62,7 @@
                             </div>
                             <div>
                                 <p class="text-[10px] text-gray-500 uppercase font-black mb-1 tracking-tighter">Account Holder</p>
-                                <p class="text-white font-bold text-sm truncate">S3C - {{ auth()->user()->name }}</p>
+                                <p class="text-white font-bold text-sm truncate">{{ config('app.name') }} s3c-{{ auth()->user()->username ?? auth()->id() }}</p>
                             </div>
                         </div>
                         

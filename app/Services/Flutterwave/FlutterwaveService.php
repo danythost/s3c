@@ -21,16 +21,49 @@ class FlutterwaveService
     public function createVirtualAccount(array $userData)
     {
         try {
+            $vaUsername = $userData['va_username'] ?? ($userData['lastname'] ?? $userData['user_id']);
+            $fullName = config('app.name') . ' ' . $vaUsername;
+
+            $startTime = microtime(true);
+            $payload = [
+                'email'        => $userData['email'],
+                'is_permanent' => true,
+                'bvn'          => $userData['bvn'] ?? null,
+                'tx_ref'       => 'VA-' . $userData['user_id'] . '-' . time(),
+                'phonenumber'  => $userData['phone'] ?? null,
+                'firstname'    => config('app.name'),
+                'lastname'     => $vaUsername,
+                'narration'    => $fullName,
+                'account_name' => $fullName,
+            ];
+
             $response = Http::withToken($this->secretKey)
-                ->post($this->baseUrl . '/virtual-account-numbers', [
-                    'email'       => $userData['email'],
-                    'is_permanent' => true,
-                    'bvn'         => $userData['bvn'] ?? null,
-                    'tx_ref'      => 'VA-' . $userData['user_id'] . '-' . time(),
-                    'phonenumber' => $userData['phone'] ?? null,
-                    'firstname'   => $userData['firstname'] ?? 'User',
-                    'lastname'    => $userData['lastname'] ?? $userData['user_id'],
-                ]);
+                ->post($this->baseUrl . '/virtual-account-numbers', $payload);
+
+            $duration = (int) ((microtime(true) - $startTime) * 1000);
+
+            try {
+                \App\Services\Logger\ApiLogger::log(
+                    'flutterwave-va',
+                    'POST',
+                    $this->baseUrl . '/virtual-account-numbers',
+                    $payload,
+                    $response->json(),
+                    $response->status(),
+                    $duration
+                );
+            } catch (\Throwable $e) {
+                Log::error('Failed to log FLW VA request: ' . $e->getMessage());
+            }
+
+            Log::info('Flutterwave VA Request Payload: ' . json_encode([
+                'email'        => $userData['email'],
+                'is_permanent' => true,
+                'bvn'          => $userData['bvn'] ?? null,
+                'firstname'    => config('app.name'),
+                'lastname'     => $vaUsername,
+                'narration'    => $fullName,
+            ]));
 
             if (!$response->successful()) {
                 $errorBody = $response->body();
@@ -39,6 +72,7 @@ class FlutterwaveService
             }
 
             $data = $response->json();
+            Log::info('Flutterwave VA Success Response: ' . json_encode($data));
 
             if (($data['status'] ?? '') !== 'success') {
                 return ['success' => false, 'message' => $data['message'] ?? 'Unknown error'];
@@ -66,8 +100,24 @@ class FlutterwaveService
      */
     public function verifyTransaction(string $transactionId)
     {
-        $response = Http::withToken($this->secretKey)
-            ->get($this->baseUrl . "/transactions/{$transactionId}/verify");
+        $startTime = microtime(true);
+        $url = $this->baseUrl . "/transactions/{$transactionId}/verify";
+        $response = Http::withToken($this->secretKey)->get($url);
+        $duration = (int) ((microtime(true) - $startTime) * 1000);
+
+        try {
+            \App\Services\Logger\ApiLogger::log(
+                'flutterwave-verify',
+                'GET',
+                $url,
+                [],
+                $response->json(),
+                $response->status(),
+                $duration
+            );
+        } catch (\Throwable $e) {
+            Log::error('Failed to log FLW Verify request: ' . $e->getMessage());
+        }
 
         return $response->json();
     }
@@ -84,8 +134,24 @@ class FlutterwaveService
         if ($from) $params['from'] = $from;
         if ($to) $params['to'] = $to;
 
-        $response = Http::withToken($this->secretKey)
-            ->get($this->baseUrl . "/transactions", $params);
+        $startTime = microtime(true);
+        $url = $this->baseUrl . "/transactions";
+        $response = Http::withToken($this->secretKey)->get($url, $params);
+        $duration = (int) ((microtime(true) - $startTime) * 1000);
+
+        try {
+            \App\Services\Logger\ApiLogger::log(
+                'flutterwave-transactions',
+                'GET',
+                $url,
+                $params,
+                $response->json(),
+                $response->status(),
+                $duration
+            );
+        } catch (\Throwable $e) {
+            Log::error('Failed to log FLW Transactions request: ' . $e->getMessage());
+        }
 
         return $response->json();
     }

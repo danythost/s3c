@@ -21,20 +21,25 @@ class EpinsWebhookController extends Controller
     public function handle(Request $request)
     {
         // 1. Log the payload for debugging (File & Database)
-        Log::channel('daily')->info('Epins Webhook Received:', $request->all());
+        Log::channel('daily')->info('Epins Webhook Received:', [
+            'url' => $request->fullUrl(),
+            'method' => $request->method(),
+            'payload' => $request->all(),
+            'ip' => $request->ip()
+        ]);
 
         try {
             \App\Services\Logger\ApiLogger::log(
                 'epins-webhook', 
-                'POST', 
+                $request->method(), 
                 $request->fullUrl(), 
                 $request->all(), 
-                ['status' => 'processing'], 
+                ['status' => 'received'], 
                 200, 
                 0
             );
         } catch (\Throwable $e) {
-            // Ignore log failure
+            Log::error('Failed to log Epins Webhook to database: ' . $e->getMessage());
         }
 
         // 2. Identify the Reference

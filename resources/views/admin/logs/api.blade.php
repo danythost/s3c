@@ -71,10 +71,13 @@
                                 @endif
                                 <div class="text-[10px] text-gray-500">{{ $log->duration_ms }}ms</div>
                             </td>
-                            <td class="p-6 text-right">
-                                <button onclick="viewLog({{ $log->id }})" class="text-blue-400 hover:text-blue-300 text-xs font-bold uppercase tracking-wider transition-colors">
-                                    View Details
+                            <td class="p-6 text-right space-x-3">
+                                <button onclick="viewLog({{ $log->id }})" class="text-blue-400 hover:text-blue-300 text-[10px] font-black uppercase tracking-widest transition-colors">
+                                    Quick Look
                                 </button>
+                                <a href="{{ route('admin.logs.api.show', $log->id) }}" class="text-emerald-400 hover:text-emerald-300 text-[10px] font-black uppercase tracking-widest transition-colors">
+                                    Full View
+                                </a>
                                 
                                 <!-- Hidden Data for Modal -->
                                 <textarea id="req-{{ $log->id }}" class="hidden">{{ json_encode($log->request_payload, JSON_PRETTY_PRINT) }}</textarea>

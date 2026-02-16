@@ -47,8 +47,7 @@ class GenerateVirtualAccounts extends Command
             $result = $flwService->createVirtualAccount([
                 'user_id'   => $user->id,
                 'email'     => $user->email,
-                'firstname' => explode(' ', $user->name)[0] ?? 'User',
-                'lastname'  => explode(' ', $user->name)[1] ?? $user->id,
+                'va_username' => 's3c-' . ($user->username ?? $user->id),
                 'bvn'       => $this->option('bvn') ?? config('services.flutterwave.test_bvn'),
             ]);
 

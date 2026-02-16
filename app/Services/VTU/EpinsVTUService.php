@@ -28,7 +28,7 @@ class EpinsVTUService implements VTUProviderInterface
     public function purchaseData(array $payload): VTUResponse
     {
         $reference = $payload['reference'] ?? 'D' . dechex(time()) . bin2hex(random_bytes(4));
-        $networkId = $this->mapNetwork($payload['network'] ?? '');
+        $networkId = $this->mapDataNetworkCode($payload['network'] ?? '');
         
         try {
             $startTime = microtime(true);
@@ -88,8 +88,8 @@ class EpinsVTUService implements VTUProviderInterface
     public function purchaseAirtime(array $payload): VTUResponse
     {
         $reference = $payload['reference'] ?? 'A' . dechex(time()) . bin2hex(random_bytes(4));
-        // Use mapNetworkName for airtime as it requires strings like 'mtn', 'airtel'
-        $networkId = $this->mapNetworkName($payload['network'] ?? '');
+        // Use mapAirtimeNetworkName for airtime as it requires strings like 'mtn', 'airtel'
+        $networkId = $this->mapAirtimeNetworkName($payload['network'] ?? '');
         
         try {
             $startTime = microtime(true);
@@ -181,7 +181,7 @@ class EpinsVTUService implements VTUProviderInterface
 
 
 
-    protected function mapNetworkName(string $network): string
+    protected function mapAirtimeNetworkName(string $network): string
     {
         return match (strtoupper($network)) {
             'MTN'     => 'mtn',
@@ -195,7 +195,7 @@ class EpinsVTUService implements VTUProviderInterface
     /**
      * Map network names to EPINS codes
      */
-    protected function mapNetwork(string $network): string
+    protected function mapDataNetworkCode(string $network): string
     {
         return match (strtoupper($network)) {
             'MTN'     => '01',

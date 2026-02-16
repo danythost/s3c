@@ -21,10 +21,9 @@ class WalletController extends Controller
         if (!$virtualAccount) {
             $result = $flwService->createVirtualAccount([
                 'user_id'   => $user->id,
-                'email'     => $user->email,
-                'firstname' => explode(' ', $user->name)[0] ?? 'User',
-                'lastname'  => explode(' ', $user->name)[1] ?? $user->id,
-                'phone'     => $user->phone ?? null,
+                'email'       => $user->email,
+                'va_username' => 's3c-' . ($user->username ?? $user->id),
+                'phone'       => $user->phone ?? null,
                 'bvn'       => config('services.flutterwave.test_bvn'),
             ]);
 

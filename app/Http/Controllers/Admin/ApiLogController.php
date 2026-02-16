@@ -26,7 +26,7 @@ class ApiLogController extends Controller
         }
 
         if ($request->filled('provider')) {
-            $query->where('provider', $request->provider);
+            $query->where('provider', 'like', "%{$request->provider}%");
         }
 
         if ($request->filled('status')) {
