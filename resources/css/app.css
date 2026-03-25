@@ -15,3 +15,12 @@
     }
     --animate-pop: pop 0.3s ease-out;
 }
+
+/* ── Ionic WebView: safe area insets (notch / home indicator) ── */
+header, .navbar, .top-bar {
+    padding-top: env(safe-area-inset-top);
+}
+
+footer, .bottom-nav, .tab-bar {
+    padding-bottom: env(safe-area-inset-bottom);
+}
