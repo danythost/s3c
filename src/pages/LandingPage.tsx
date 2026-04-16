@@ -30,9 +30,18 @@ import {
     description?: string;
   }
   
+  interface PageData {
+    title: string;
+    content: string;
+    image_url?: string;
+    meta?: any;
+  }
+  
   const LandingPage: React.FC = () => {
     const { user } = useAuth();
     const [products, setProducts] = useState<Product[]>([]);
+    const [pageData, setPageData] = useState<PageData | null>(null);
+    const [ceoData, setCeoData] = useState<PageData | null>(null);
   
     // Fallback products if API is empty
     const defaultProducts = [
@@ -57,6 +66,28 @@ import {
           console.error('API Error:', err);
           setProducts(defaultProducts);
         });
+
+      // Fetch home page data
+      client.get('/public/pages/home')
+        .then(res => {
+          if (res.data && res.data.success && res.data.data) {
+            setPageData(res.data.data);
+          }
+        })
+        .catch(err => {
+          console.error('API Error fetching page data:', err);
+        });
+
+      // Fetch CEO data
+      client.get('/public/pages/ceo')
+        .then(res => {
+          if (res.data && res.data.success && res.data.data) {
+            setCeoData(res.data.data);
+          }
+        })
+        .catch(err => {
+          console.error('API Error fetching ceo data:', err);
+        });
     }, []);
 
   return (
@@ -74,13 +105,17 @@ import {
           </div>
           
           <h1 className="text-5xl lg:text-8xl font-bold text-white tracking-tight leading-[1.05] mb-10">
-            Your Daily <span className="text-indigo-500">Digital</span> <br /> 
-            Companion.
+            {pageData?.title ? (
+                <span>{pageData.title}</span>
+            ) : (
+                <>Your Daily <span className="text-indigo-500">Digital</span> <br /> Companion.</>
+            )}
           </h1>
           
-          <p className="max-w-2xl mx-auto text-slate-300 text-lg lg:text-xl font-medium leading-relaxed mb-14 opacity-90">
-            Get instant data, airtime, and pay bills with ease. 
-            Fast, secure, and always ready when you are.
+          <p className="max-w-2xl mx-auto text-slate-300 text-lg lg:text-xl font-medium leading-relaxed mb-14 opacity-90 whitespace-pre-line">
+            {pageData?.content 
+               ? pageData.content 
+               : "Get instant data, airtime, and pay bills with ease.\nFast, secure, and always ready when you are."}
           </p>
 
           <div className="flex flex-col sm:flex-row items-center justify-center gap-6">
@@ -281,17 +316,21 @@ import {
              <div className="bg-slate-900 rounded-[64px] p-12 lg:p-24 border border-white/5 shadow-2xl relative overflow-hidden text-center space-y-12">
                 <div className="absolute top-0 left-1/2 -translate-x-1/2 w-64 h-64 bg-indigo-600/10 blur-[100px] rounded-full pointer-events-none"></div>
                 
-                <div className="w-24 h-24 bg-indigo-600 text-white rounded-3xl mx-auto flex items-center justify-center border-4 border-slate-950 shadow-2xl mb-8">
-                     <Users size={40} />
-                </div>
+                {ceoData?.image_url ? (
+                    <img src={`http://localhost:8000${ceoData.image_url}`} alt="CEO" className="w-24 h-24 rounded-3xl mx-auto object-cover border-4 border-slate-950 shadow-2xl mb-8" />
+                ) : (
+                    <div className="w-24 h-24 bg-indigo-600 text-white rounded-3xl mx-auto flex items-center justify-center border-4 border-slate-950 shadow-2xl mb-8">
+                         <Users size={40} />
+                    </div>
+                )}
 
                 <p className="text-2xl lg:text-3xl font-medium text-slate-200 leading-relaxed italic opacity-90">
-                    "We are dedicated to providing the easiest way for you to stay connected. Making technology simple for everyone."
+                    "{ceoData?.content || "We are dedicated to providing the easiest way for you to stay connected. Making technology simple for everyone."}"
                 </p>
 
                 <div className="space-y-2">
-                    <h4 className="text-xl font-bold text-white tracking-tight uppercase">Henry D.</h4>
-                    <p className="text-indigo-500 font-bold text-xs uppercase tracking-widest">Founder & CEO</p>
+                    <h4 className="text-xl font-bold text-white tracking-tight uppercase">{ceoData?.meta?.name || "Henry D."}</h4>
+                    <p className="text-indigo-500 font-bold text-xs uppercase tracking-widest">{ceoData?.meta?.position || "Founder & CEO"}</p>
                 </div>
 
                 <div className="pt-10 flex justify-center opacity-30">
