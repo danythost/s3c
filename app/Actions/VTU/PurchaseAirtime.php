@@ -98,6 +98,8 @@ class PurchaseAirtime
                 // SUCCESS
                 $txn->update([
                     'status' => 'success',
+                    'cost_price' => $response->data['cost_price'] ?? null,
+                    'profit'     => $response->data['profit'] ?? null,
                     'meta'   => array_merge($txn->meta ?? [], $response->data ?? []),
                 ]);
 

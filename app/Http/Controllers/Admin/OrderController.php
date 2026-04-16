@@ -6,7 +6,7 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 
 use App\Models\WalletTransaction;
-use App\Services\VTU\EpinsVTUService;
+use App\Contracts\VTU\VTUProviderInterface;
 use Illuminate\Support\Facades\Log;
 
 class OrderController extends Controller
@@ -38,7 +38,7 @@ class OrderController extends Controller
         return view('admin.orders.show', compact('transaction'));
     }
 
-    public function retry($id)
+    public function retry($id, VTUProviderInterface $vtuService)
     {
         $transaction = WalletTransaction::findOrFail($id);
 
@@ -47,16 +47,14 @@ class OrderController extends Controller
         }
 
         try {
-            // Simplified retry logic - currently supporting EPINS
+            // Re-use VTU provider interface for retries
             if ($transaction->source === 'data' || $transaction->source === 'airtime') {
-                $service = new EpinsVTUService();
                 $meta = $transaction->meta ?? [];
                 
                 $payload = [
                     'network' => $meta['network'] ?? '',
                     'phone' => $meta['phone'] ?? '',
-                    // Generate new 17-char ref: R + 8 hex time + 8 hex rand
-                    'reference' => 'R' . dechex(time()) . bin2hex(random_bytes(4)),
+                    'reference' => 'RETRY_' . strtoupper(uniqid()),
                 ];
 
                 if ($transaction->source === 'data') {
@@ -71,20 +69,23 @@ class OrderController extends Controller
                     }
 
                     $payload['plan_code'] = $planCode;
-                    $response = $service->purchaseData($payload);
+                    $payload['plan_id'] = $meta['plan_id'] ?? null;
+                    $response = $vtuService->purchaseData($payload);
                 } else {
                     $payload['amount'] = $transaction->amount;
-                    $response = $service->purchaseAirtime($payload);
+                    $response = $vtuService->purchaseAirtime($payload);
                 }
 
-                // Update logs
-                $logs = $transaction->meta['api_response'] ?? [];
+                // Update logs in transaction meta
+                $logs = $transaction->meta['retry_logs'] ?? [];
                 $logs[] = [
                     'retry_at' => now()->toIso8601String(),
+                    'success' => $response->success,
+                    'message' => $response->message,
                     'response' => $response->data
                 ];
                 
-                $newMeta = array_merge($transaction->meta, ['api_response' => $logs]);
+                $newMeta = array_merge($transaction->meta, ['retry_logs' => $logs]);
 
                 if ($response->success) {
                     $transaction->update([

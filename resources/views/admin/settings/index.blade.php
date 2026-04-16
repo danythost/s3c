@@ -90,7 +90,42 @@
                             <input type="number" step="0.01" name="settings[reseller_discount]" value="{{ $settings['pricing']['reseller_discount']->value ?? 0 }}" class="w-full bg-[#0f172a] border border-white/10 rounded-xl px-4 py-3 text-sm focus:border-blue-500 outline-none">
                         </div>
 
-                        <button type="submit" class="bg-blue-600 hover:bg-blue-500 px-8 py-3 rounded-xl font-bold transition-all">Update Pricing</button>
+                        <div class="pt-4 border-t border-white/5">
+                            <h4 class="text-sm font-bold text-blue-400 uppercase tracking-widest mb-4">Peyflex Airtime Margins (%)</h4>
+                            <div class="grid grid-cols-2 gap-4">
+                                @foreach(['mtn', 'airtel', 'glo', '9mobile'] as $net)
+                                    <div>
+                                        <label class="block text-[10px] font-bold text-gray-500 uppercase mb-1">{{ $net }} Profit %</label>
+                                        <input type="number" step="0.1" name="settings[peyflex_airtime_{{ $net }}]" value="{{ $settings['pricing']['peyflex_airtime_' . $net]->value ?? 0 }}" class="w-full bg-[#0f172a] border border-white/10 rounded-xl px-4 py-2 text-sm focus:border-blue-500 outline-none">
+                                    </div>
+                                @endforeach
+                            </div>
+                        </div>
+
+                        <div class="pt-4 border-t border-white/5">
+                            <h4 class="text-sm font-bold text-emerald-400 uppercase tracking-widest mb-4">Peyflex Data Margins (%)</h4>
+                            <div class="grid grid-cols-2 gap-4">
+                                <div>
+                                    <label class="block text-[10px] font-bold text-gray-500 uppercase mb-1">Shared / CG Profit %</label>
+                                    <input type="number" step="0.1" name="settings[peyflex_data_shared_cg]" value="{{ $settings['pricing']['peyflex_data_shared_cg']->value ?? 0 }}" class="w-full bg-[#0f172a] border border-white/10 rounded-xl px-4 py-2 text-sm focus:border-blue-500 outline-none">
+                                </div>
+                                <div>
+                                    <label class="block text-[10px] font-bold text-gray-500 uppercase mb-1">Gifting Profit %</label>
+                                    <input type="number" step="0.1" name="settings[peyflex_data_gifting]" value="{{ $settings['pricing']['peyflex_data_gifting']->value ?? 0 }}" class="w-full bg-[#0f172a] border border-white/10 rounded-xl px-4 py-2 text-sm focus:border-blue-500 outline-none">
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="pt-4 border-t border-white/5">
+                            <h4 class="text-sm font-bold text-amber-400 uppercase tracking-widest mb-4">Wallet Funding Charge (₦)</h4>
+                            <div>
+                                <label class="block text-[10px] font-bold text-gray-500 uppercase mb-1">Flat Charge Per Deposit (₦)</label>
+                                <input type="number" step="1" name="settings[wallet_funding_charge]" value="{{ $settings['pricing']['wallet_funding_charge']->value ?? 30 }}" class="w-full bg-[#0f172a] border border-white/10 rounded-xl px-4 py-2 text-sm focus:border-blue-500 outline-none">
+                                <p class="text-xs text-gray-500 mt-1">Deducted from every wallet deposit. Set to 0 to disable.</p>
+                            </div>
+                        </div>
+
+                        <button type="submit" class="bg-blue-600 hover:bg-blue-500 px-8 py-3 rounded-xl font-bold transition-all w-full">Update Settings</button>
                     </form>
                 </div>
             </div>

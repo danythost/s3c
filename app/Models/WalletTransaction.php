@@ -16,6 +16,8 @@ class WalletTransaction extends Model
         'reference',
         'type',
         'amount',
+        'cost_price',
+        'profit',
         'status',
         'source',
         'meta',

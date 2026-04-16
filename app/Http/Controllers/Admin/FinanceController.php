@@ -8,10 +8,8 @@ use Illuminate\Http\Request;
 use App\Models\User;
 use App\Models\Wallet;
 use App\Models\WalletTransaction;
-use App\Services\VTU\EpinsVTUService;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Log;
+use App\Contracts\VTU\VTUProviderInterface;
 
 class FinanceController extends Controller
 {
@@ -22,7 +20,7 @@ class FinanceController extends Controller
             'total_transactions' => WalletTransaction::count(),
             'total_funded' => WalletTransaction::where('type', 'credit')->where('status', 'success')->sum('amount'), // Approximate
             'total_withdrawals' => WalletTransaction::where('type', 'debit')->where('status', 'success')->sum('amount'), // Approximate
-             // Assuming commissions are credited
+            'total_profit' => WalletTransaction::where('status', 'success')->sum('profit'),
             'total_commissions' => WalletTransaction::where('type', 'commission')->where('status', 'success')->sum('amount'),
         ];
 
@@ -104,19 +102,18 @@ class FinanceController extends Controller
         }
     }
 
-    public function provider()
+    public function provider(VTUProviderInterface $vtuService)
     {
-        // Provider balance check (Epins)
-        $epinsBalance = Cache::remember('provider_balance_epins', 300, function () {
+        // Provider balance check
+        $providerBalance = Cache::remember('provider_balance', 300, function () use ($vtuService) {
             try {
-                $service = new EpinsVTUService();
-                $response = $service->getBalance();
-                return $response->success ? ($response->data['balance'] ?? 0) : null;
+                $response = $vtuService->getBalance();
+                return $response->success ? ($response->data['wallet_credit'] ?? ($response->data['balance'] ?? 0)) : null;
             } catch (\Exception $e) {
                 return null;
             }
         });
 
-        return view('admin.finance.provider', compact('epinsBalance'));
+        return view('admin.finance.provider', compact('providerBalance'));
     }
 }

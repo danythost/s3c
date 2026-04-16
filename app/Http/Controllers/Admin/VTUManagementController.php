@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\DataPlan;
 use App\Models\AirtimeControl;
+use App\Contracts\VTU\VTUProviderInterface;
 use Illuminate\Validation\Rule;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
@@ -18,7 +19,7 @@ class VTUManagementController extends Controller
         $query = DataPlan::query();
 
         if ($request->filled('network')) {
-            $query->where('network', $request->network);
+            $query->where('network', 'like', '%' . $request->network . '%');
         }
 
         if ($request->filled('provider')) {
@@ -36,6 +37,27 @@ class VTUManagementController extends Controller
         $networks = DataPlan::select('network')->distinct()->pluck('network');
 
         return view('admin.vtu.plans', compact('plans', 'networks'));
+    }
+
+    public function syncPeyflexPlans(VTUProviderInterface $vtuService)
+    {
+        try {
+            if (!($vtuService instanceof \App\Services\VTU\PeyflexVTUService)) {
+                return back()->with('error', 'Peyflex is not the active VTU provider.');
+            }
+
+            $result = $vtuService->syncDataPlans();
+            
+            $msg = "Successfully synced {$result['imported']} data plans.";
+            if (!empty($result['errors'])) {
+                $msg .= " However, some errors occurred: " . implode(', ', $result['errors']);
+                return back()->with('warning', $msg);
+            }
+
+            return back()->with('success', $msg);
+        } catch (\Exception $e) {
+            return back()->with('error', 'Sync failed: ' . $e->getMessage());
+        }
     }
 
     public function storePlan(Request $request)
@@ -85,7 +107,7 @@ class VTUManagementController extends Controller
                     ['code' => $row['code']],
                     [
                         'network' => strtoupper($row['network']),
-                        'provider' => $row['provider'] ?? 'epins',
+                        'provider' => $row['provider'] ?? 'peyflex',
                         'name' => $row['name'],
                         'volume' => $row['volume'] ?? null,
                         'type' => $row['type'] ?? null,

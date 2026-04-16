@@ -14,14 +14,12 @@ class SystemSettingsSeeder extends Seeder
     {
         // Default Providers
         \App\Models\Provider::updateOrCreate(
-            ['slug' => 'epins'],
+            ['slug' => 'peyflex'],
             [
-                'name' => 'Epins VTU',
+                'name' => 'Peyflex VTU',
                 'config' => [
-                    'api_key' => config('vtu.epins.api_key'),
-                    'username' => config('vtu.epins.username'),
-                    'bearer_token' => config('vtu.epins.bearer_token'),
-                    'base_url' => config('vtu.epins.base_url'),
+                    'api_key' => config('vtu.peyflex.api_key'),
+                    'base_url' => config('vtu.peyflex.base_url'),
                 ],
                 'is_active' => true,
             ]
@@ -34,5 +32,13 @@ class SystemSettingsSeeder extends Seeder
         // Pricing Settings
         \App\Models\Setting::updateOrCreate(['key' => 'global_markup'], ['value' => '0', 'group' => 'pricing']);
         \App\Models\Setting::updateOrCreate(['key' => 'reseller_discount'], ['value' => '0', 'group' => 'pricing']);
+
+        // Peyflex Profit Margins
+        \App\Models\Setting::updateOrCreate(['key' => 'peyflex_airtime_mtn'], ['value' => '1', 'group' => 'pricing']);
+        \App\Models\Setting::updateOrCreate(['key' => 'peyflex_airtime_airtel'], ['value' => '1.4', 'group' => 'pricing']);
+        \App\Models\Setting::updateOrCreate(['key' => 'peyflex_airtime_glo'], ['value' => '2', 'group' => 'pricing']);
+        \App\Models\Setting::updateOrCreate(['key' => 'peyflex_airtime_9mobile'], ['value' => '2', 'group' => 'pricing']);
+        \App\Models\Setting::updateOrCreate(['key' => 'peyflex_data_shared_cg'], ['value' => '5', 'group' => 'pricing']);
+        \App\Models\Setting::updateOrCreate(['key' => 'peyflex_data_gifting'], ['value' => '1', 'group' => 'pricing']);
     }
 }

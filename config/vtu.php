@@ -2,17 +2,22 @@
 
 return [
 
-    'epins' => [
-        'mode' => env('EPINS_MODE', 'sandbox'),
+    'peyflex' => [
+        'mode' => env('PEYFLEX_MODE', 'production'),
+        'base_url' => env('PEYFLEX_BASE_URL', 'https://client.peyflex.com.ng/api'),
+        'api_key' => env('PEYFLEX_API_KEY'),
         
-        'base_url' => env('EPINS_MODE') === 'live'
-            ? env('EPINS_LIVE_BASE_URL', 'https://api.epins.com.ng/v3/autho')
-            : env('EPINS_SANDBOX_BASE_URL', 'https://api.epins.com.ng/v1'),
-
-        'api_key'  => env('EPINS_API_KEY'),
-        'username' => env('EPINS_USERNAME'),
-        'bearer_token' => env('EPINS_BEARER_TOKEN'),
-        'use_real_service' => env('USE_REAL_VT_SERVICE', false),
+        // Airtime Commission Rates (Discount we get from provider)
+        'airtime_rates' => [
+            'mtn'     => 0.010, // 1%
+            'airtel'  => 0.014, // 1.4%
+            'glo'     => 0.020, // 2%
+            '9mobile' => 0.020, // 2%
+        ],
+        'data_rates' => [
+            'shared_cg' => 0.05, // 5% profit
+            'gifting' => 0.01,   // 1% profit
+        ],
     ],
 
 ];

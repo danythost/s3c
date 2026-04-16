@@ -4,7 +4,7 @@ namespace App\Providers;
 
 use Illuminate\Support\ServiceProvider;
 use App\Contracts\VTU\VTUProviderInterface;
-use App\Services\VTU\EpinsVTUService;
+use App\Services\VTU\PeyflexVTUService;
 use App\Services\VTU\MockVTUService;
 
 class VTUServiceProvider extends ServiceProvider
@@ -15,8 +15,8 @@ class VTUServiceProvider extends ServiceProvider
     public function register(): void
     {
         $this->app->bind(VTUProviderInterface::class, function ($app) {
-            if (config('app.env') === 'production' || config('vtu.epins.use_real_service')) {
-                return new EpinsVTUService();
+            if (config('app.env') === 'production' || config('vtu.peyflex.api_key')) {
+                return new PeyflexVTUService();
             }
             return new MockVTUService();
         });

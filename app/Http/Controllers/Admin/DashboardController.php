@@ -7,15 +7,15 @@ use App\Models\User;
 use App\Models\Order;
 use App\Models\Wallet;
 use App\Models\DataPlan;
-use App\Services\VTU\EpinsVTUService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
 
 use App\Models\WalletTransaction;
+use App\Contracts\VTU\VTUProviderInterface;
 
 class DashboardController extends Controller
 {
-    public function index()
+    public function index(VTUProviderInterface $vtuService)
     {
         $stats = [
             'total_users' => User::count(),
@@ -27,12 +27,16 @@ class DashboardController extends Controller
             'today_revenue' => Order::whereDate('created_at', today())->whereIn('status', ['success', 'completed'])->sum('amount') + WalletTransaction::whereDate('created_at', today())->whereIn('status', ['success', 'completed'])->sum('amount'),
             'successful_orders' => Order::whereIn('status', ['success', 'completed'])->count() + WalletTransaction::whereIn('status', ['success', 'completed'])->count(),
             'failed_orders' => Order::where('status', 'failed')->count() + WalletTransaction::where('status', 'failed')->count(),
-            'provider_balance' => Cache::remember('provider_balance', 300, function () { // Cache for 5 mins
+            'total_profit' => WalletTransaction::where('status', 'success')->sum('profit'),
+            'provider_balance' => Cache::remember('provider_balance', 300, function () use ($vtuService) { // Cache for 5 mins
                 try {
-                    $service = new EpinsVTUService();
-                    $response = $service->getBalance();
-                    return $response->success ? ($response->data['balance'] ?? 0) : null;
+                    $response = $vtuService->getBalance();
+                    if ($response->success) {
+                        return $response->data['balance'] ?? $response->data['wallet_credit'] ?? 0;
+                    }
+                    return null;
                 } catch (\Exception $e) {
+                    \Illuminate\Support\Facades\Log::error("Dashboard Balance Error: " . $e->getMessage());
                     return null;
                 }
             }),

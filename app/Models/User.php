@@ -29,6 +29,13 @@ class User extends Authenticatable
         'tier',
     ];
 
+    protected $appends = ['wallet_balance'];
+
+    public function getWalletBalanceAttribute()
+    {
+        return $this->wallet ? $this->wallet->balance : 0;
+    }
+
     /**
      * The attributes that should be hidden for serialization.
      *

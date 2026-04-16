@@ -83,10 +83,15 @@ class FlutterwaveWebhookController extends Controller
             return response()->json(['message' => 'User not found'], 404);
         }
 
-        // 5. Credit Wallet
-        DB::transaction(function () use ($user, $amount, $transactionId, $payload) {
+        // 5. Get the funding charge from settings
+        $fundingCharge = (float) \App\Models\Setting::getValue('wallet_funding_charge', 30);
+        $chargeAmount = min($fundingCharge, $amount);
+        $netCredit = $amount - $chargeAmount;
+
+        // 6. Credit Wallet (net amount after charge)
+        DB::transaction(function () use ($user, $amount, $netCredit, $chargeAmount, $transactionId, $payload) {
             $wallet = $user->wallet ?: $user->wallet()->create(['balance' => 0]);
-            $wallet->increment('balance', $amount);
+            $wallet->increment('balance', $netCredit);
 
             WalletTransaction::create([
                 'user_id'   => $user->id,
@@ -97,6 +102,19 @@ class FlutterwaveWebhookController extends Controller
                 'source'    => 'wallet_funding',
                 'meta'      => $payload,
             ]);
+
+            // Record the funding charge
+            if ($chargeAmount > 0) {
+                WalletTransaction::create([
+                    'user_id'   => $user->id,
+                    'reference' => 'CHG-' . $transactionId,
+                    'amount'    => $chargeAmount,
+                    'type'      => 'debit',
+                    'status'    => 'success',
+                    'source'    => 'funding_charge',
+                    'meta'      => ['deposit_ref' => $transactionId, 'charge' => $chargeAmount],
+                ]);
+            }
         });
 
         return response()->json(['status' => 'success']);

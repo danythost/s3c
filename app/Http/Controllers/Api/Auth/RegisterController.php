@@ -7,6 +7,7 @@ use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\Rules\Password;
+use Illuminate\Auth\Events\Registered;
 
 class RegisterController extends Controller
 {
@@ -31,6 +32,8 @@ class RegisterController extends Controller
             'tier' => 'Basic User',
             'is_active' => true,
         ]);
+ 
+        event(new Registered($user));
 
         // Standard Laravel logic usually has observers to create wallet/VA
         // But if not, we can trigger them here if needed.

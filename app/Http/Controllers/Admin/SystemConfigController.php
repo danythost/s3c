@@ -17,7 +17,9 @@ class SystemConfigController extends Controller
     public function index()
     {
         $providers = Provider::all();
-        $settings = Setting::all()->groupBy('group');
+        $settings = Setting::all()->groupBy('group')->map(function ($items) {
+            return $items->keyBy('key');
+        });
         $auditLogs = AuditLog::with('user')->latest()->paginate(20, ['*'], 'audit_page');
 
         // Maintenance Data

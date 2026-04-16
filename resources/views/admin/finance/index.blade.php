@@ -67,15 +67,15 @@
         </div>
     </div>
 
-    <!-- Commissions -->
-    <div class="glass p-6 rounded-2xl">
+    <!-- Total Profit -->
+    <div class="glass p-6 rounded-2xl border border-emerald-500/20">
         <div class="flex items-center gap-4">
-            <div class="w-12 h-12 rounded-xl bg-amber-500/10 flex items-center justify-center text-amber-400">
-                 <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M12 8v13m0-13V6a2 2 0 112 2h-2zm0 0V5.5A2.5 2.5 0 109.5 8H12zm-7 4h14M5 12a2 2 0 110-4h14a2 2 0 110 4M5 12v7a2 2 0 002 2h10a2 2 0 002-2v-7"/></svg>
+            <div class="w-12 h-12 rounded-xl bg-emerald-500/10 flex items-center justify-center text-emerald-400">
+                 <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"/></svg>
             </div>
             <div>
-                <p class="text-sm text-gray-400">Commissions</p>
-                <h3 class="text-2xl font-bold text-white">₦{{ number_format($stats['total_commissions'], 2) }}</h3>
+                <p class="text-sm text-gray-400">Total Profit</p>
+                <h3 class="text-2xl font-bold text-emerald-400">₦{{ number_format($stats['total_profit'], 2) }}</h3>
             </div>
         </div>
     </div>

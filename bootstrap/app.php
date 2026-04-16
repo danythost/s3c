@@ -19,7 +19,6 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->validateCsrfTokens(except: [
             '/webhooks/flutterwave',
             '/webhooks/vtuafrica',
-            '/webhooks/epins',
         ]);
 
         $middleware->redirectGuestsTo(function (\Illuminate\Http\Request $request) {

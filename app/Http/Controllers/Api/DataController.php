@@ -15,7 +15,7 @@ class DataController extends Controller
     public function index()
     {
         $plans = DataPlan::where('is_active', true)
-            ->where('provider', 'epins')
+            ->select('id', 'network', 'name', 'volume', 'selling_price', 'validity')
             ->get();
 
         return response()->json([
@@ -37,11 +37,12 @@ class DataController extends Controller
         $plan = DataPlan::findOrFail($validated['plan_id']);
 
         $payload = [
-            'phone'     => $validated['phone'],
-            'network'   => $validated['network'],
-            'plan_code' => $plan->code,
-            'plan_id'   => $plan->id,
-            'amount'    => $plan->selling_price,
+            'phone'          => $validated['phone'],
+            'network'        => $plan->network,
+            'plan_code'      => $plan->code,
+            'plan_id'        => $plan->id,
+            'amount'         => $plan->selling_price,
+            'provider_price' => $plan->provider_price,
         ];
 
         try {

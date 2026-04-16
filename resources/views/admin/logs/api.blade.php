@@ -21,8 +21,8 @@
             </div>
             <select name="provider" onchange="this.form.submit()" class="glass px-4 py-2 rounded-xl text-sm text-gray-300 focus:outline-none cursor-pointer">
                 <option value="">All Providers</option>
-                <option value="epins" {{ request('provider') == 'epins' ? 'selected' : '' }}>Epins (Outgoing)</option>
-                <option value="epins-webhook" {{ request('provider') == 'epins-webhook' ? 'selected' : '' }}>Epins (Webhook)</option>
+                <option value="peyflex" {{ request('provider') == 'peyflex' ? 'selected' : '' }}>Peyflex (Outgoing)</option>
+                <option value="peyflex-webhook" {{ request('provider') == 'peyflex-webhook' ? 'selected' : '' }}>Peyflex (Webhook)</option>
                 <option value="flutterwave" {{ request('provider') == 'flutterwave' ? 'selected' : '' }}>Flutterwave</option>
             </select>
         </form>
@@ -49,8 +49,8 @@
                                 <div class="text-[10px] text-gray-600">{{ $log->created_at->diffForHumans() }}</div>
                             </td>
                             <td class="p-6">
-                                @if($log->provider === 'epins-webhook')
-                                    <span class="px-3 py-1 rounded-full text-[10px] font-bold bg-purple-500/10 text-purple-400 border border-purple-500/20">WEBHOOK</span>
+                                @if(str_contains($log->provider, 'webhook'))
+                                    <span class="px-3 py-1 rounded-full text-[10px] font-bold bg-purple-500/10 text-purple-400 border border-purple-500/20 uppercase">WEBHOOK</span>
                                 @else
                                     <span class="px-3 py-1 rounded-full text-[10px] font-bold bg-blue-500/10 text-blue-400 border border-blue-500/20 uppercase">{{ $log->provider }}</span>
                                 @endif

@@ -1,65 +1,13 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\Web\DataController;
-use App\Http\Controllers\Web\WalletController;
-use App\Http\Controllers\DashboardController; // User created this one
-use App\Http\Controllers\Auth\LoginController; // User created this one
-use App\Http\Controllers\Auth\RegisterController; // User created this one
 
+// Backend/API landing page
 Route::get('/', function () {
-    $products = \App\Models\Product::where('status', 'active')->latest()->take(8)->get();
-    
-    // Fetch active pages
-    $pages = \App\Models\Page::where('is_active', true)->whereIn('slug', ['home', 'about', 'developers', 'ceo', 'team'])->get()->keyBy('slug');
-
-    return view('home', compact('products', 'pages'));
+    return view('home');
 })->name('home');
 
-Route::get('/shop', [\App\Http\Controllers\Web\ShopController::class, 'index'])->name('shop');
-
-// Guest Routes
-Route::middleware('guest')->group(function () {
-    Route::get('/login', [LoginController::class, 'show'])->name('login');
-    Route::post('/login', [LoginController::class, 'login'])->middleware('throttle:login');
-    Route::get('/register', [RegisterController::class, 'show'])->name('register');
-    Route::post('/register', [RegisterController::class, 'register']);
-
-    // Password Reset Routes
-    Route::get('/forgot-password', [\App\Http\Controllers\Auth\ForgotPasswordController::class, 'showLinkRequestForm'])->name('password.request');
-    Route::post('/forgot-password', [\App\Http\Controllers\Auth\ForgotPasswordController::class, 'sendResetLinkEmail'])->name('password.email');
-    Route::get('/reset-password/{token}', [\App\Http\Controllers\Auth\ResetPasswordController::class, 'showResetForm'])->name('password.reset');
-    Route::post('/reset-password', [\App\Http\Controllers\Auth\ResetPasswordController::class, 'reset'])->name('password.update');
-});
-
-Route::middleware(['auth'])->group(function () {
-    // Dashboard
-    Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
-
-    // VTU Routes
-    Route::get('/vtu/data', [DataController::class, 'index'])->name('vtu.data.index');
-    Route::post('/vtu/data/purchase', [DataController::class, 'purchase'])->name('vtu.data.purchase');
-    
-    Route::get('/vtu/airtime', [\App\Http\Controllers\Web\AirtimeController::class, 'index'])->name('vtu.airtime.index');
-    Route::post('/vtu/airtime/purchase', [\App\Http\Controllers\Web\AirtimeController::class, 'purchase'])->name('vtu.airtime.purchase');
-
-    // Wallet Routes
-    Route::get('/wallet', [WalletController::class, 'index'])->name('wallet.index');
-    Route::post('/wallet/refresh', [WalletController::class, 'refresh'])->name('wallet.refresh');
-
-    // Airtime to Cash (A2C)
-    Route::get('/airtime-to-cash', [\App\Http\Controllers\Web\A2CController::class, 'index'])->name('a2c.index');
-
-    // Profile
-    Route::get('/profile', [\App\Http\Controllers\Web\ProfileController::class, 'show'])->name('profile');
-
-    // Auth
-    Route::post('/logout', [LoginController::class, 'logout'])->name('logout');
-    Route::get('/logout', [LoginController::class, 'logout']);
-});
-
 // Admin Routes
-// Admin Auth Routes
 Route::prefix('admin')->name('admin.')->group(function () {
     Route::middleware('guest:admin')->group(function () {
         Route::get('/login', [\App\Http\Controllers\Admin\AdminAuthController::class, 'showLoginForm'])->name('login');
@@ -74,6 +22,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
         
         // VTU Management
         Route::get('/vtu/plans', [\App\Http\Controllers\Admin\VTUManagementController::class, 'plans'])->name('vtu.plans');
+        Route::post('/vtu/plans/sync', [\App\Http\Controllers\Admin\VTUManagementController::class, 'syncPeyflexPlans'])->name('vtu.plans.sync');
         Route::post('/vtu/plans', [\App\Http\Controllers\Admin\VTUManagementController::class, 'storePlan'])->name('vtu.plans.store');
         Route::post('/vtu/plans/import', [\App\Http\Controllers\Admin\VTUManagementController::class, 'importPlans'])->name('vtu.plans.import');
         Route::patch('/vtu/plans/{plan}/price', [\App\Http\Controllers\Admin\VTUManagementController::class, 'updatePrice'])->name('vtu.plans.update-price');
@@ -136,4 +85,3 @@ Route::prefix('admin')->name('admin.')->group(function () {
 Route::post('/webhooks/flutterwave', [\App\Http\Controllers\Webhooks\FlutterwaveWebhookController::class, 'handle']);
 
 Route::post('/webhooks/vtuafrica', \App\Http\Controllers\Webhooks\VtuAfricaWebhookController::class)->name('webhooks.vtuafrica');
-Route::post('/webhooks/epins', [\App\Http\Controllers\Webhooks\EpinsWebhookController::class, 'handle'])->name('webhooks.epins');

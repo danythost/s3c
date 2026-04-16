@@ -104,6 +104,8 @@ class PurchaseData
                 // SUCCESS
                 $txn->update([
                     'status' => 'success',
+                    'cost_price' => $response->data['cost_price'] ?? ($data['provider_price'] ?? null),
+                    'profit'     => $response->data['profit'] ?? (($data['amount'] ?? 0) - ($data['provider_price'] ?? 0)),
                     'meta'   => array_merge($txn->meta ?? [], $response->data ?? []),
                 ]);
 

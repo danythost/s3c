@@ -109,6 +109,18 @@
         </div>
     </div>
 
+    <div class="glass p-6 rounded-2xl border border-emerald-500/20">
+        <div class="flex items-center gap-4">
+            <div class="w-12 h-12 rounded-xl bg-emerald-400/20 flex items-center justify-center text-emerald-400">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"/></svg>
+            </div>
+            <div>
+                <p class="text-sm text-gray-400">Total Profit</p>
+                <h3 class="text-2xl font-bold text-emerald-400">₦{{ number_format($stats['total_profit'], 2) }}</h3>
+            </div>
+        </div>
+    </div>
+
     <div class="glass p-6 rounded-2xl">
         <div class="flex items-center gap-4">
             <div class="w-12 h-12 rounded-xl bg-amber-500/10 flex items-center justify-center text-amber-400">

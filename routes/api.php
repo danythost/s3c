@@ -7,9 +7,17 @@ use App\Http\Controllers\Api\Auth\AuthController;
 Route::post('/login', [AuthController::class, 'login'])->name('api.login');
 Route::post('/register', [\App\Http\Controllers\Api\Auth\RegisterController::class, 'register'])->name('api.register');
 
+// Public Content Routes
+Route::prefix('public')->group(function () {
+    Route::get('/products', [\App\Http\Controllers\Api\PublicContentController::class, 'products']);
+    Route::get('/pages/{slug}', [\App\Http\Controllers\Api\PublicContentController::class, 'page']);
+    Route::get('/settings', [\App\Http\Controllers\Api\PublicContentController::class, 'settings']);
+    Route::get('/announcements', [\App\Http\Controllers\Api\PublicContentController::class, 'announcements']);
+});
+
 Route::middleware('auth:sanctum')->group(function () {
     Route::get('/user', function (Request $request) {
-        return $request->user();
+        return $request->user()->loadMissing('virtualAccount');
     });
     
     Route::get('/dashboard', [\App\Http\Controllers\Api\DashboardController::class, 'index'])->name('api.dashboard');
@@ -23,6 +31,7 @@ Route::middleware('auth:sanctum')->group(function () {
     
     // Wallet
     Route::get('/wallet/history', [\App\Http\Controllers\Api\WalletController::class, 'history'])->name('api.wallet.history');
+    Route::post('/wallet/refresh', [\App\Http\Controllers\Api\WalletController::class, 'refresh'])->name('api.wallet.refresh');
     
     // Profile & Security
     Route::post('/profile/update', [\App\Http\Controllers\Api\ProfileController::class, 'update'])->name('api.profile.update');

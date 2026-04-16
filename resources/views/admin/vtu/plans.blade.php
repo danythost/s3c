@@ -13,6 +13,13 @@
     </div>
     
     <div class="flex flex-wrap gap-2">
+        <form action="{{ route('admin.vtu.plans.sync') }}" method="POST" onsubmit="return confirm('This will refresh all data plans from Peyflex. Continue?')">
+            @csrf
+            <button type="submit" class="glass px-4 py-2 rounded-xl text-xs font-bold hover:bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 transition-all flex items-center gap-2">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
+                Sync with Peyflex
+            </button>
+        </form>
         <button @click="showImport = true" class="glass px-4 py-2 rounded-xl text-xs font-bold hover:bg-white/10 transition-all flex items-center gap-2">
             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/></svg>
             Import CSV
@@ -67,7 +74,7 @@
                     </div>
                     <div>
                         <label class="text-xs text-gray-400 block mb-1">Provider ID</label>
-                        <input type="text" name="provider" value="epins" class="w-full bg-white/5 border border-white/10 rounded-lg p-2 text-sm outline-none">
+                        <input type="text" name="provider" value="peyflex" class="w-full bg-white/5 border border-white/10 rounded-lg p-2 text-sm outline-none">
                     </div>
                 </div>
                 <div>
@@ -107,8 +114,8 @@
     <form method="GET" class="flex flex-wrap gap-4">
         <select name="network" onchange="this.form.submit()" class="bg-[#0f172a] glass px-4 py-2 rounded-xl text-xs font-bold outline-none border border-transparent focus:border-blue-500 transition-all">
             <option value="">All Networks</option>
-            @foreach(['MTN', 'GLO', 'AIRTEL', '9MOBILE'] as $net)
-                <option value="{{ $net }}" {{ request('network') == $net ? 'selected' : '' }}>{{ $net }}</option>
+            @foreach($networks as $net)
+                <option value="{{ $net }}" {{ request('network') == $net ? 'selected' : '' }}>{{ strtoupper($net) }}</option>
             @endforeach
         </select>
         <input type="text" name="search" value="{{ request('search') }}" placeholder="Search plans..." class="bg-[#0f172a] glass px-4 py-2 rounded-xl text-xs outline-none border border-transparent focus:border-blue-500 transition-all w-64">

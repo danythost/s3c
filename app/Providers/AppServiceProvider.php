@@ -34,10 +34,8 @@ class AppServiceProvider extends ServiceProvider
 
         User::observe(UserObserver::class);
 
-        Event::listen(
-            Registered::class,
-            CreateVirtualAccountForUser::class
-        );
+        // Create Flutterwave Virtual Account when a new user registers
+        Event::listen(Registered::class, CreateVirtualAccountForUser::class);
 
         Event::listen(Login::class, function ($event) {
             $user = $event->user;
@@ -80,21 +78,5 @@ class AppServiceProvider extends ServiceProvider
             return Limit::perMinute(5)->by($request->ip());
         });
 
-        // View Composers
-        view()->composer('*', function ($view) {
-            $now = now();
-            $announcements = \App\Models\Announcement::where('is_active', true)
-                ->where(function ($query) use ($now) {
-                    $query->whereNull('start_at')
-                        ->orWhere('start_at', '<=', $now);
-                })
-                ->where(function ($query) use ($now) {
-                    $query->whereNull('end_at')
-                        ->orWhere('end_at', '>=', $now);
-                })
-                ->latest()
-                ->get();
-            $view->with('activeAnnouncements', $announcements);
-        });
     }
 }
