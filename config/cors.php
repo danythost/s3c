@@ -26,6 +26,7 @@ return [
         'http://localhost:8000',
         'http://192.168.0.102:8080',
         'http://192.168.0.102:5173',
+        'http://192.168.0.140:8080',
         'capacitor://localhost',
         'https://s3c.com.ng',
         'https://www.s3c.com.ng',
