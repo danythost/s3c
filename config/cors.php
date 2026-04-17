@@ -27,6 +27,8 @@ return [
         'http://192.168.0.102:8080',
         'http://192.168.0.102:5173',
         'capacitor://localhost',
+        'https://s3c.com.ng',
+        'https://www.s3c.com.ng',
     ],
 
     'allowed_origins_patterns' => [],
