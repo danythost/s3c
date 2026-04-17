@@ -1,0 +1,151 @@
+import React, { useState } from 'react';
+import { useNavigate, useSearchParams, Link } from 'react-router-dom';
+import client from '../api/client';
+import { Zap, Lock, Eye, EyeOff, AlertCircle, ArrowRight, CheckCircle2 } from 'lucide-react';
+
+export const ResetPassword: React.FC = () => {
+  const [searchParams] = useSearchParams();
+  const navigate = useNavigate();
+  const token = searchParams.get('token');
+  const email = searchParams.get('email');
+
+  const [password, setPassword] = useState('');
+  const [passwordConfirmation, setPasswordConfirmation] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
+  const [error, setError] = useState('');
+  const [success, setSuccess] = useState(false);
+  const [loading, setLoading] = useState(false);
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (password !== passwordConfirmation) {
+      setError('Passwords do not match.');
+      return;
+    }
+
+    setLoading(true);
+    setError('');
+    try {
+      await client.post('/password/reset', {
+        token,
+        email,
+        password,
+        password_confirmation: passwordConfirmation,
+      });
+      setSuccess(true);
+      setTimeout(() => navigate('/login'), 3000);
+    } catch (err: any) {
+      setError(err.response?.data?.message || 'Failed to reset password. The link may have expired.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  if (!token || !email) {
+    return (
+      <div className="min-h-screen bg-[#0F172A] flex items-center justify-center p-6">
+        <div className="bg-slate-900 border border-white/5 rounded-3xl p-8 text-center max-w-md">
+          <AlertCircle size={48} className="text-rose-500 mx-auto mb-4" />
+          <h2 className="text-xl font-bold text-white mb-2">Invalid Reset Link</h2>
+          <p className="text-slate-400 mb-6">This password reset link is invalid or has expired.</p>
+          <Link to="/forgot-password" className="text-indigo-400 font-bold hover:underline">Request a new link</Link>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="min-h-screen bg-[#0F172A] flex items-center justify-center p-6 relative overflow-hidden">
+      {/* Abstract Background Accents */}
+      <div className="absolute top-0 right-0 w-96 h-96 bg-indigo-600/10 blur-[100px] rounded-full -mr-48 -mt-48 animate-pulse"></div>
+      <div className="absolute bottom-0 left-0 w-80 h-80 bg-emerald-500/5 blur-[100px] rounded-full -ml-40 -mb-40"></div>
+
+      <div className="w-full max-w-md relative z-10">
+        <div className="text-center mb-10">
+          <Link to="/" className="inline-flex items-center gap-3 mb-6 group">
+            <div className="w-12 h-12 bg-indigo-600 rounded-2xl flex items-center justify-center shadow-lg shadow-indigo-600/20 group-hover:scale-110 transition-transform">
+              <Zap size={24} className="text-white fill-current" />
+            </div>
+            <h1 className="text-3xl font-bold text-white tracking-tighter">S3C.</h1>
+          </Link>
+          <h2 className="text-xl font-bold text-white tracking-tight">Set your new password</h2>
+          <p className="text-slate-500 text-sm mt-2">Create a secure password for your account.</p>
+        </div>
+
+        <div className="bg-slate-900 border border-white/5 rounded-3xl p-8 lg:p-10 shadow-2xl">
+          {success ? (
+            <div className="text-center space-y-6">
+              <div className="w-20 h-20 bg-emerald-500/10 rounded-full flex items-center justify-center mx-auto border border-emerald-500/20">
+                <CheckCircle2 size={40} className="text-emerald-500" />
+              </div>
+              <div className="space-y-2">
+                <h3 className="text-xl font-bold text-white">Password Reset Successful</h3>
+                <p className="text-slate-400 text-sm">Your password has been updated. Redirecting to login...</p>
+              </div>
+            </div>
+          ) : (
+            <>
+              {error && (
+                <div className="mb-6 p-4 bg-rose-500/10 border border-rose-500/20 rounded-xl flex items-center gap-3 text-rose-500 text-sm font-semibold">
+                  <AlertCircle size={18} />
+                  {error}
+                </div>
+              )}
+
+              <form onSubmit={handleSubmit} className="space-y-6">
+                <div className="space-y-2">
+                  <label className="text-xs font-bold text-slate-400 uppercase tracking-wider px-1">New Password</label>
+                  <div className="relative group">
+                    <Lock className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500 group-focus-within:text-indigo-500 transition-colors" size={18} />
+                    <input
+                      type={showPassword ? 'text' : 'password'}
+                      className="w-full bg-slate-800/50 border border-white/10 rounded-2xl p-4 pl-12 text-white outline-none focus:border-indigo-500/50 focus:ring-4 focus:ring-indigo-500/5 transition-all"
+                      placeholder="••••••••"
+                      value={password}
+                      onChange={(e) => setPassword(e.target.value)}
+                      required
+                      minLength={8}
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowPassword(!showPassword)}
+                      className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-500 hover:text-slate-300"
+                    >
+                      {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                    </button>
+                  </div>
+                </div>
+
+                <div className="space-y-2">
+                  <label className="text-xs font-bold text-slate-400 uppercase tracking-wider px-1">Confirm New Password</label>
+                  <div className="relative group">
+                    <Lock className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500 group-focus-within:text-indigo-500 transition-colors" size={18} />
+                    <input
+                      type={showPassword ? 'text' : 'password'}
+                      className="w-full bg-slate-800/50 border border-white/10 rounded-2xl p-4 pl-12 text-white outline-none focus:border-indigo-500/50 focus:ring-4 focus:ring-indigo-500/5 transition-all"
+                      placeholder="••••••••"
+                      value={passwordConfirmation}
+                      onChange={(e) => setPasswordConfirmation(e.target.value)}
+                      required
+                    />
+                  </div>
+                </div>
+
+                <button
+                  type="submit"
+                  disabled={loading}
+                  className="w-full bg-indigo-600 hover:bg-white hover:text-slate-900 text-white font-bold py-4 rounded-2xl shadow-xl transition-all flex items-center justify-center gap-3 disabled:opacity-50 group mt-4 active:scale-95"
+                >
+                  {loading ? 'Updating Password...' : 'Reset Password'}
+                  <ArrowRight size={18} className="group-hover:translate-x-1 transition-transform" />
+                </button>
+              </form>
+            </>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default ResetPassword;
