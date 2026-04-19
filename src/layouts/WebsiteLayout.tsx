@@ -41,7 +41,7 @@ const WebsiteLayout: React.FC<WebsiteLayoutProps> = ({ children, darkMode = fals
   return (
     <div className={`min-h-screen font-sans selection:bg-indigo-100 selection:text-indigo-900 ${darkMode ? 'bg-[#0F172A]' : 'bg-slate-50'}`}>
       {/* Navigation */}
-      <nav className={`sticky top-0 z-50 backdrop-blur-2xl border-b transition-colors duration-300 ${darkMode ? 'bg-[#0F172A]/80 border-white/5' : 'bg-white/80 border-slate-100'}`}>
+      <nav className={`sticky top-0 z-50 backdrop-blur-2xl border-b transition-colors duration-300 pt-safe ${darkMode ? 'bg-[#0F172A]/80 border-white/5' : 'bg-white/80 border-slate-100'}`}>
         <div className="max-w-7xl mx-auto px-6 h-24 flex items-center justify-between">
           <div className="flex items-center gap-12">
             <Link to="/" className={`text-2xl font-bold italic tracking-tight flex items-center gap-3 group ${darkMode ? 'text-white' : 'text-slate-900'}`}>

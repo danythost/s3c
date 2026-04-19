@@ -91,7 +91,7 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
     <div className="min-h-screen bg-[#0F172A] flex overflow-hidden font-sans text-slate-200">
       {/* Sidebar - Desktop */}
       <aside className={`fixed inset-y-0 left-0 z-50 w-64 bg-slate-900 border-r border-white/5 transform transition-transform duration-300 ease-in-out lg:relative lg:translate-x-0 ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'}`}>
-        <div className="h-full flex flex-col p-6">
+        <div className="h-full flex flex-col p-6 pt-safe">
           {/* Logo */}
           <div className="flex items-center gap-3 px-2 mb-10">
             <div className="w-8 h-8 bg-indigo-600 rounded-lg flex items-center justify-center shadow-lg shadow-indigo-600/20">
@@ -145,7 +145,7 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
       {/* Main Content Area */}
       <div className="flex-1 flex flex-col h-screen overflow-hidden">
         {/* Top Header */}
-        <header className="h-20 bg-slate-900 border-b border-white/5 flex items-center justify-between px-6 lg:px-8 shrink-0 sticky top-0 z-40">
+        <header className="h-20 bg-slate-900 border-b border-white/5 flex items-center justify-between px-6 lg:px-8 shrink-0 sticky top-0 z-40 pt-safe font-bold">
           <div className="flex items-center gap-6">
             <button 
               onClick={() => setSidebarOpen(true)}
