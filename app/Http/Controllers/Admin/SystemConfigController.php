@@ -133,4 +133,17 @@ class SystemConfigController extends Controller
 
         return back()->with('success', 'Setting added.');
     }
+
+    public function resetRevenue()
+    {
+        try {
+            Artisan::call('revenue:reset', ['--force' => true]);
+            
+            AuditLog::log('revenue_reset', "Admin triggered a hard reset of revenue data via dashboard.");
+            
+            return back()->with('success', 'Revenue and transactions have been reset.');
+        } catch (\Exception $e) {
+            return back()->with('error', 'Error resetting revenue: ' . $e->getMessage());
+        }
+    }
 }

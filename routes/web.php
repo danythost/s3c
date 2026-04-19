@@ -73,6 +73,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
         // Maintenance
         Route::post('/settings/maintenance/clear-cache', [\App\Http\Controllers\Admin\SystemConfigController::class, 'clearCache'])->name('settings.maintenance.clear-cache');
         Route::post('/settings/maintenance/failed-jobs', [\App\Http\Controllers\Admin\SystemConfigController::class, 'manageFailedJobs'])->name('settings.maintenance.failed-jobs');
+        Route::post('/settings/maintenance/reset-revenue', [\App\Http\Controllers\Admin\SystemConfigController::class, 'resetRevenue'])->name('settings.maintenance.reset-revenue');
 
         // Security & Audit
         Route::get('/security', [\App\Http\Controllers\Admin\SecurityController::class, 'index'])->name('security.index');

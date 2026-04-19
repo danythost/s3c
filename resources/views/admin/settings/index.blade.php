@@ -220,7 +220,7 @@
                 </div>
 
                 <!-- Cache Control -->
-                <div class="glass p-8 rounded-3xl">
+                <div class="glass p-8 rounded-3xl mb-6">
                     <h3 class="text-xl font-bold mb-6">Cache Management</h3>
                     <div class="flex flex-wrap gap-4">
                         <form action="{{ route('admin.settings.maintenance.clear-cache') }}" method="POST">
@@ -259,6 +259,19 @@
                             </button>
                         </form>
                     </div>
+                </div>
+
+                <!-- Database Cleanup -->
+                <div class="glass p-8 rounded-3xl border border-red-500/20">
+                    <h3 class="text-xl font-bold text-red-400 mb-2">Revenue & Transactions Reset</h3>
+                    <p class="text-sm text-gray-400 mb-6">Permanently delete all order history and wallet transactions. This action cannot be undone.</p>
+                    
+                    <form action="{{ route('admin.settings.maintenance.reset-revenue') }}" method="POST" onsubmit="return confirm('CRITICAL ACTION: This will PERMANENTLY delete all orders and wallet transactions. Are you absolutely sure?')">
+                        @csrf
+                        <button type="submit" class="bg-red-600/20 text-red-400 border border-red-600/30 px-8 py-3 rounded-xl font-bold hover:bg-red-600 hover:text-white transition-all">
+                            Reset Revenue Data (Hard Reset)
+                        </button>
+                    </form>
                 </div>
             </div>
         </div>
