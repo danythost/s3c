@@ -15,9 +15,9 @@ import {
   Users,
   Code2,
   PhoneCall,
-  ChevronRight,
   TrendingUp,
-  Cpu
+  Cpu,
+  Download
 } from 'lucide-react';
 
   interface Product {
@@ -135,8 +135,12 @@ import {
               </Link>
             )}
             
-            <a href="#services" className="px-10 py-6 rounded-2xl font-bold text-sm tracking-wide text-white hover:bg-white/5 transition-all flex items-center gap-2 border border-white/5">
-                Explore Services <ChevronRight size={16} />
+            <a 
+              href="/download/s3cmobile.apk" 
+              className="group border border-white/10 text-white px-10 py-6 rounded-2xl font-bold text-sm tracking-wide flex items-center gap-3 hover:bg-white hover:text-slate-900 transition-all shadow-xl"
+              download
+            >
+              Download App <Download size={18} className="group-hover:translate-y-1 transition-transform" />
             </a>
           </div>
         </div>
