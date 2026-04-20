@@ -27,7 +27,7 @@ class DashboardController extends Controller
             'today_revenue' => Order::whereDate('created_at', today())->whereIn('status', ['success', 'completed'])->sum('amount') + WalletTransaction::whereDate('created_at', today())->whereIn('status', ['success', 'completed'])->sum('amount'),
             'successful_orders' => Order::whereIn('status', ['success', 'completed'])->count() + WalletTransaction::whereIn('status', ['success', 'completed'])->count(),
             'failed_orders' => Order::where('status', 'failed')->count() + WalletTransaction::where('status', 'failed')->count(),
-            'total_profit' => WalletTransaction::where('status', 'success')->sum('profit'),
+            'total_profit' => WalletTransaction::whereIn('status', ['success', 'completed'])->sum('profit'),
             'provider_balance' => Cache::remember('provider_balance', 300, function () use ($vtuService) { // Cache for 5 mins
                 try {
                     $response = $vtuService->getBalance();

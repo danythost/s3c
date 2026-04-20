@@ -18,9 +18,9 @@ class FinanceController extends Controller
         $stats = [
             'total_user_balance' => Wallet::sum('balance'),
             'total_transactions' => WalletTransaction::count(),
-            'total_funded' => WalletTransaction::where('type', 'credit')->where('status', 'success')->sum('amount'), // Approximate
-            'total_withdrawals' => WalletTransaction::where('type', 'debit')->where('status', 'success')->sum('amount'), // Approximate
-            'total_profit' => WalletTransaction::where('status', 'success')->sum('profit'),
+            'total_funded' => WalletTransaction::where('type', 'credit')->whereIn('status', ['success', 'completed'])->sum('amount'), // Approximate
+            'total_withdrawals' => WalletTransaction::where('type', 'debit')->whereIn('status', ['success', 'completed'])->sum('amount'), // Approximate
+            'total_profit' => WalletTransaction::whereIn('status', ['success', 'completed'])->sum('profit'),
             'total_commissions' => WalletTransaction::where('type', 'commission')->where('status', 'success')->sum('amount'),
         ];
 

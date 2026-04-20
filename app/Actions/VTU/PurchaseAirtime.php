@@ -8,6 +8,7 @@ use App\Actions\Wallet\ReverseWallet;
 use App\Models\Order;
 use App\Models\WalletTransaction;
 use App\Models\User;
+use App\Models\Setting;
 use App\Domains\VTU\VTUResponse;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
@@ -96,10 +97,17 @@ class PurchaseAirtime
                 }
 
                 // SUCCESS
+                $network = strtolower($data['network']);
+                $settingKey = 'peyflex_airtime_' . $network;
+                $rate = (float) Setting::getValue($settingKey, config('vtu.peyflex.airtime_rates.' . $network, 0));
+                
+                $calculatedProfit = $amount * ($rate / 100);
+                $calculatedCost = $amount - $calculatedProfit;
+
                 $txn->update([
                     'status' => 'success',
-                    'cost_price' => $response->data['cost_price'] ?? null,
-                    'profit'     => $response->data['profit'] ?? null,
+                    'cost_price' => $response->data['cost_price'] ?? $calculatedCost,
+                    'profit'     => $response->data['profit'] ?? $calculatedProfit,
                     'meta'   => array_merge($txn->meta ?? [], $response->data ?? []),
                 ]);
 
